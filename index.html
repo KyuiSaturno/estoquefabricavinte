@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque - Ecobags</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="tela-login" class="container-login">
+        <div class="caixa-login">
+            <h2>Acesso Restrito</h2>
+            <p>Insira suas credenciais para acessar o estoque de Ecobags.</p>
+            <input type="text" id="usuario" placeholder="Usuário" required>
+            <input type="password" id="senha" placeholder="Senha" required>
+            <button id="btn-login" onclick="fazerLogin()">Entrar</button>
+            <p id="erro-login" class="erro"></p>
+        </div>
+    </div>
+
+    <div id="painel-principal" class="escondido">
+        <header>
+            <div class="topo">
+                <h1>Painel Ecobags</h1>
+                <span id="nome-operador">Usuário: ---</span>
+            </div>
+        </header>
+
+        <main class="conteudo">
+            <section class="secao-produtos">
+                <h2>Modelos Disponíveis</h2>
+                <div id="lista-produtos" class="grade-produtos">
+                    <p class="carregando">Carregando modelos do estoque...</p>
+                </div>
+            </section>
+
+            <section class="secao-carrinho">
+                <h2>Itens Selecionados</h2>
+                <div id="itens-carrinho">
+                    <p class="carrinho-vazio">Nenhum item selecionado.</p>
+                </div>
+                
+                <div class="formulario-baixa">
+                    <label for="localizacao">Destino da Saída:</label>
+                    <select id="localizacao">
+                        <option value="Jijoca">Jijoca</option>
+                        <option value="Jericoacoara">Jericoacoara</option>
+                    </select>
+                    
+                    <button id="btn-confirmar" class="btn-sucesso" onclick="confirmarBaixa()" disabled>
+                        Confirmar Baixa no Estoque
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
