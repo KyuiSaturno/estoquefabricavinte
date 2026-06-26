@@ -427,3 +427,86 @@ body {
     font-weight: 600;
     padding: 20px;
 }
+
+/* ==========================================
+   ANIMAÇÕES E ADAPTAÇÕES DA LOGO / ABAS
+   ========================================== */
+
+.topo-esquerda {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+/* Tamanho profissional e borda levemente arredondada para a logo */
+.logo-topo {
+    height: 45px;
+    width: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.logo-texto-alt {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--cor-principal);
+    letter-spacing: 1px;
+}
+
+/* Menu de Abas */
+.menu-navegacao {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-aba {
+    background-color: transparent;
+    color: #888888;
+    border: none;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-aba:hover {
+    color: var(--cor-texto-claro);
+}
+
+.btn-aba.ativa {
+    color: var(--cor-principal);
+    border-bottom-color: var(--cor-principal);
+}
+
+/* Classes de Animação Smooth */
+.fade-in {
+    animation: surgimentoSuave 0.4s ease forwards;
+}
+
+@keyframes surgimentoSuave {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filtro-container {
+    background-color: var(--cor-fundo-card);
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid #333333;
+}
+
+.filtro-container h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
