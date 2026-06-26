@@ -73,8 +73,10 @@ async function fazerLogin() {
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
             
-            // Entra direto exibindo o Estoque padrão
+            // Entra exibindo o Estoque padrão
             carregarEstoque();
+            // Busca a lista de abas/categorias reais direto da planilha "Produtos"
+            carregarCategoriasDinamicas();
         } else {
             erroLogin.innerText = resultado.erro || "Usuário ou senha incorretos.";
             btnLogin.innerText = "Entrar";
@@ -85,6 +87,48 @@ async function fazerLogin() {
         erroLogin.innerText = "Erro ao conectar com o servidor.";
         btnLogin.innerText = "Entrar";
         btnLogin.disabled = false;
+    }
+}
+
+// ==========================================
+// CONFIGURAÇÃO DO SELETOR DINÂMICO
+// ==========================================
+async function carregarCategoriasDinamicas() {
+    const seletor = document.getElementById("filtro-categoria");
+    if (!seletor) return;
+
+    try {
+        const params = new URLSearchParams();
+        params.append("dados", JSON.stringify({
+            acao: "obterAbas"
+        }));
+
+        const resposta = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: params,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        });
+
+        // CORRIGIDO: Atribuição limpa removendo a duplicidade anterior
+        const resultado = await resposta.json();
+
+        if (resultado.sucesso) {
+            // Limpa as opções estáticas antigas e mantém apenas o padrão
+            seletor.innerHTML = '<option value="">-- Escolha uma Categoria --</option>';
+            
+            // Preenche com as categorias retornadas da coluna A da aba "Produtos"
+            resultado.abas.forEach(aba => {
+                const opcao = document.createElement("option");
+                opcao.value = aba;
+                opcao.innerText = aba;
+                seletor.appendChild(opcao);
+            });
+            console.log("Categorias injetadas com sucesso:", resultado.abas);
+        } else {
+            console.error("Servidor retornou erro ao buscar abas:", resultado.erro);
+        }
+    } catch (erro) {
+        console.error("Erro crítico ao carregar abas dinâmicas:", erro);
     }
 }
 
@@ -160,7 +204,7 @@ async function filtrarPorCategoria() {
     }
 }
 
-// Renderizador Dinâmico Inteligente (Aceita escopos diferentes de IDs)
+// Renderizador Dinâmico Inteligente
 function renderizarProdutos(listaProdutos, containerId, prefixoContexto) {
     const listaDiv = document.getElementById(containerId);
     listaDiv.innerHTML = "";
@@ -361,7 +405,6 @@ async function confirmarBaixa() {
     btnConfirmar.disabled = true;
 
     try {
-        // Envia cada item apontando para a sua aba de origem correta (Ecobags, Camisas, etc)
         for (let item of carrinho) {
             const params = new URLSearchParams();
             params.append("dados", JSON.stringify({
@@ -384,7 +427,6 @@ async function confirmarBaixa() {
         carrinho = [];
         atualizarInterfaceCarrinho();
         
-        // Atualiza a visualização atual que estiver aberta na tela
         if (!document.getElementById("aba-estoque").classList.contains("escondido")) {
             carregarEstoque();
         } else {
