@@ -57,9 +57,12 @@ async function fazerLogin() {
         if (resultado.sucesso) {
             usuarioLogado = usuarioInput;
             
-            // Alimenta os seletores de identificação do operador (Tanto do PC quanto da Barra Mobile)
-            document.getElementById("nome-operador-pc").innerText = `Usuário: ${usuarioLogado}`;
-            document.getElementById("nome-operador-mobile").innerText = usuarioLogado;
+            // Correção segura: Alimenta os seletores apenas se eles existirem na tela atual
+            const elOperadorPc = document.getElementById("nome-operador-pc");
+            const elOperadorMobile = document.getElementById("nome-operador-mobile");
+            
+            if (elOperadorPc) elOperadorPc.innerText = `Usuário: ${usuarioLogado}`;
+            if (elOperadorMobile) elOperadorMobile.innerText = usuarioLogado;
             
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
