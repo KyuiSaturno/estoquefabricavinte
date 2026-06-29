@@ -2,9 +2,7 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz5wtsSda51rruXfp6k2vgu3Oj7FuP_uNJqnJypJ_ft8FC9OToInhlO7PmGF4XZbOij/exec";
 
 // Variáveis globais do sistema
-const TIPO_PADRAO_INICIAL = "Ecobags"; 
 let usuarioLogado = "";
-let dadosProdutosEstoque = [];  
 let dadosProdutosFiltrados = []; 
 let carrinho = [];      
 let indicesImagens = {}; 
@@ -13,28 +11,26 @@ let indicesImagens = {};
 // CONTROLADOR DE NAVEGAÇÃO (ABAS ANIMADAS)
 // ==========================================
 function alternarAba(abaDestino) {
-    const abaEstoque = document.getElementById("aba-estoque");
+    const abaInicio = document.getElementById("aba-inicio");
     const abaProdutos = document.getElementById("aba-produtos");
-    const btnEstoque = document.getElementById("btn-aba-estoque");
+    const btnInicio = document.getElementById("btn-aba-inicio");
     const btnProdutos = document.getElementById("btn-aba-produtos");
 
-    if (abaDestino === 'estoque') {
+    if (abaDestino === 'inicio') {
         abaProdutos.classList.add("escondido");
-        abaEstoque.classList.remove("escondido");
+        abaInicio.classList.remove("escondido");
         btnProdutos.classList.remove("ativa");
-        btnEstoque.classList.add("ativa");
-        carregarEstoque(); // Atualiza a aba principal
+        btnInicio.classList.add("ativa");
     } else if (abaDestino === 'produtos') {
-        abaEstoque.classList.add("escondido");
+        abaInicio.classList.add("escondido");
         abaProdutos.classList.remove("escondido");
-        btnEstoque.classList.remove("ativa");
+        btnInicio.classList.remove("ativa");
         btnProdutos.classList.add("ativa");
-        // Deixa para carregar quando o usuário interagir com o select de categorias
     }
 }
 
 // ==========================================
-// INTERFACE DE LOGIN
+// INTERFACE DE LOGIN E CARREGAMENTO INICIAL
 // ==========================================
 async function fazerLogin() {
     const usuarioInput = document.getElementById("usuario").value.trim();
@@ -73,9 +69,8 @@ async function fazerLogin() {
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
             
-            // Entra exibindo o Estoque padrão
-            carregarEstoque();
-            // Busca a lista de abas/categorias reais direto da planilha "Produtos"
+            // Carrega os dados dinâmicos do Sheets em paralelo para melhor performance
+            carregarMensagemBoasVindas();
             carregarCategoriasDinamicas();
         } else {
             erroLogin.innerText = resultado.erro || "Usuário ou senha incorretos.";
@@ -91,6 +86,33 @@ async function fazerLogin() {
 }
 
 // ==========================================
+// BUSCA DA FRASE DE BOAS VINDAS DO SHEETS
+// ==========================================
+async function carregarMensagemBoasVindas() {
+    const caixaTexto = document.getElementById("texto-boas-vindas");
+    try {
+        const params = new URLSearchParams();
+        params.append("dados", JSON.stringify({ acao: "obterConfiguracoes" }));
+
+        const resposta = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: params,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        });
+
+        const resultado = await resposta.json();
+        if (resultado.sucesso) {
+            caixaTexto.innerText = resultado.mensagemBoasVindas;
+        } else {
+            caixaTexto.innerText = "Bem-vindo de volta! Ótimo dia de trabalho.";
+        }
+    } catch (erro) {
+        console.error("Erro ao carregar mensagem:", erro);
+        caixaTexto.innerText = "Bem-vindo de volta! Ótimo dia de trabalho.";
+    }
+}
+
+// ==========================================
 // CONFIGURAÇÃO DO SELETOR DINÂMICO
 // ==========================================
 async function carregarCategoriasDinamicas() {
@@ -99,9 +121,7 @@ async function carregarCategoriasDinamicas() {
 
     try {
         const params = new URLSearchParams();
-        params.append("dados", JSON.stringify({
-            acao: "obterAbas"
-        }));
+        params.append("dados", JSON.stringify({ acao: "obterAbas" }));
 
         const resposta = await fetch(WEB_APP_URL, {
             method: "POST",
@@ -109,63 +129,26 @@ async function carregarCategoriasDinamicas() {
             headers: { "Content-Type": "application/x-www-form-urlencoded" }
         });
 
-        // CORRIGIDO: Atribuição limpa removendo a duplicidade anterior
         const resultado = await resposta.json();
 
         if (resultado.sucesso) {
-            // Limpa as opções estáticas antigas e mantém apenas o padrão
             seletor.innerHTML = '<option value="">-- Escolha uma Categoria --</option>';
-            
-            // Preenche com as categorias retornadas da coluna A da aba "Produtos"
             resultado.abas.forEach(aba => {
                 const opcao = document.createElement("option");
                 opcao.value = aba;
                 opcao.innerText = aba;
                 seletor.appendChild(opcao);
             });
-            console.log("Categorias injetadas com sucesso:", resultado.abas);
-        } else {
-            console.error("Servidor retornou erro ao buscar abas:", resultado.erro);
+            console.log("Categorias carregadas com sucesso:", resultado.abas);
         }
     } catch (erro) {
-        console.error("Erro crítico ao carregar abas dinâmicas:", erro);
+        console.error("Erro ao carregar categorias dinâmicas:", erro);
     }
 }
 
 // ==========================================
-// PROCESSAMENTO DE DADOS DO SHEETS
+// FILTRAGEM E EXIBIÇÃO DE PRODUTOS
 // ==========================================
-async function carregarEstoque() {
-    const listaDiv = document.getElementById("lista-produtos");
-    listaDiv.innerHTML = '<p class="carregando">Buscando modelos atualizados...</p>';
-
-    try {
-        const params = new URLSearchParams();
-        params.append("dados", JSON.stringify({
-            acao: "obterProdutos",
-            tipo: TIPO_PADRAO_INICIAL
-        }));
-
-        const resposta = await fetch(WEB_APP_URL, {
-            method: "POST",
-            body: params,
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
-        });
-
-        const resultado = await resposta.json();
-
-        if (resultado.sucesso) {
-            dadosProdutosEstoque = resultado.produtos;
-            renderizarProdutos(dadosProdutosEstoque, "lista-produtos", "estoque");
-        } else {
-            listaDiv.innerHTML = `<p class="erro">Erro ao carregar estoque: ${resultado.erro}</p>`;
-        }
-    } catch (erro) {
-        console.error("Erro ao obter estoque:", erro);
-        listaDiv.innerHTML = '<p class="erro">Erro de conexão ao buscar o estoque.</p>';
-    }
-}
-
 async function filtrarPorCategoria() {
     const categoriaSelecionada = document.getElementById("filtro-categoria").value;
     const containerFiltrados = document.getElementById("lista-produtos-filtrados");
@@ -204,7 +187,6 @@ async function filtrarPorCategoria() {
     }
 }
 
-// Renderizador Dinâmico Inteligente
 function renderizarProdutos(listaProdutos, containerId, prefixoContexto) {
     const listaDiv = document.getElementById(containerId);
     listaDiv.innerHTML = "";
@@ -292,8 +274,7 @@ function mudarFoto(idUnicoControle, totalFotos, direcao) {
 
 function atualizarStatusEstoque(produtoId, prefixoContexto) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
-    const lista = prefixoContexto === "estoque" ? dadosProdutosEstoque : dadosProdutosFiltrados;
-    const produto = lista.find(p => p.id === produtoId);
+    const produto = dadosProdutosFiltrados.find(p => p.id === produtoId);
     
     const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
     const qtdDisponivel = produto.estoquePorCor[corSelecionada] || 0;
@@ -319,8 +300,7 @@ function atualizarStatusEstoque(produtoId, prefixoContexto) {
 // ==========================================
 function adicionarAoCarrinho(produtoId, prefixoContexto) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
-    const lista = prefixoContexto === "estoque" ? dadosProdutosEstoque : dadosProdutosFiltrados;
-    const produto = lista.find(p => p.id === produtoId);
+    const produto = dadosProdutosFiltrados.find(p => p.id === produtoId);
     
     const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
     const estoqueMaximo = produto.estoquePorCor[corSelecionada] || 0;
@@ -341,8 +321,22 @@ function adicionarAoCarrinho(produtoId, prefixoContexto) {
             corSelecionada: corSelecionada,
             quantidade: 1,
             maximo: estoqueMaximo,
-            categoriaOrigem: prefixoContexto === "estoque" ? TIPO_PADRAO_INICIAL : document.getElementById("filtro-categoria").value
+            categoriaOrigem: document.getElementById("filtro-categoria").value
         });
+    }
+    atualizarInterfaceCarrinho();
+}
+
+function改变QuantidadeCarrinho(index, alteracao) {
+    const item = carrinho[index];
+    const novaQtd = item.quantidade + alteracao;
+
+    if (novaQtd <= 0) {
+        carrinho.splice(index, 1);
+    } else if (novaQtd <= item.maximo) {
+        item.quantidade = novaQtd;
+    } else {
+        alert("A quantidade excede o estoque real disponível.");
     }
     atualizarInterfaceCarrinho();
 }
@@ -354,7 +348,6 @@ function alterarQuantidadeCarrinho(index, alteracao) {
     if (novaQtd <= 0) {
         carrinho.splice(index, 1);
     } else if (novaQtd <= item.maximo) {
-        item.whitespace = " ";
         item.quantidade = novaQtd;
     } else {
         alert("A quantidade excede o estoque real disponível.");
@@ -423,15 +416,10 @@ async function confirmarBaixa() {
             await resposta.json();
         }
 
-        alert("Baixa processada com sucesso em todas as abas correspondentes!");
+        alert("Baixa processada com sucesso!");
         carrinho = [];
         atualizarInterfaceCarrinho();
-        
-        if (!document.getElementById("aba-estoque").classList.contains("escondido")) {
-            carregarEstoque();
-        } else {
-            filtrarPorCategoria();
-        }
+        filtrarPorCategoria();
 
     } catch (erro) {
         console.error("Erro na baixa:", erro);
