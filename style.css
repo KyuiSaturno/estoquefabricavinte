@@ -207,16 +207,17 @@ body {
     display: block;
 }
 
-/* Botões do Carrossel */
+/* Botões do Carrossel Ajustados para a Base */
 .btn-carrossel {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.7);
+    top: auto;                 /* Remove centralização vertical antiga */
+    bottom: 12px;              /* Alinha os botões flutuando na base */
+    transform: none;           /* Remove reset de posicionamento */
+    background-color: rgba(0, 0, 0, 0.65);
     color: var(--cor-principal);
     border: none;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     font-size: 14px;
     cursor: pointer;
@@ -224,15 +225,24 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 2;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-carrossel:hover {
     background-color: var(--cor-principal);
     color: var(--cor-texto-escuro);
+    transform: scale(1.05);
 }
 
-.btn-prev { left: 8px; }
-.btn-next { right: 8px; }
+.btn-prev { 
+    left: 12px; 
+    right: auto;
+}
+
+.btn-next { 
+    right: 12px; 
+    left: auto;
+}
 
 /* Informações internas do produto */
 .info-produto {
