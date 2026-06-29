@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Jeri 20 - Login</title>
+    <title>Painel Jeri 20 - Estoque</title>
+    <link rel="icon" type="image/png" href="estoquefabricavinte/favicon.png">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,7 +30,6 @@
         <button id="btn-login" class="btn-confirmar-baixa" onclick="fazerLogin()">Entrar</button>
     </div>
 
-
     <div id="painel-principal" class="escondido">
         <header class="barra-superior">
             <div class="logo-area">
@@ -41,35 +41,24 @@
         </header>
 
         <nav class="abas-navegacao">
-            <button id="btn-aba-inicio" class="btn-aba ativa" onclick="alternarAba('inicio')">Início</button>
-            <button id="btn-aba-produtos" class="btn-aba" onclick="alternarAba('produtos')">Catálogo de Produtos</button>
+            <button id="btn-aba-produtos" class="btn-aba ativa">Catálogo de Produtos</button>
         </nav>
 
         <main class="conteudo-principal">
-            <section class="coluna-conteudo">
+            
+            <div id="aba-produtos" class="bloco-card">
+                <h2>Explorar Catálogo por Categoria</h2>
+                <div class="seletor-grupo-filtro">
+                    <label for="filtro-categoria">Selecionar Categoria:</label>
+                    <select id="filtro-categoria" onchange="filtrarPorCategoria()">
+                        <option value="">-- Escolha uma Categoria --</option>
+                    </select>
+                </div>
                 
-                <div id="aba-inicio" class="bloco-card">
-                    <h2 class="titulo-boas-vindas">Painel de Controle</h2>
-                    <div class="caixa-mensagem-boas-vindas">
-                        <p id="texto-boas-vindas">Carregando mensagem do dia...</p>
-                    </div>
+                <div id="lista-produtos-filtrados" class="grid-produtos">
+                    <p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>
                 </div>
-
-                <div id="aba-produtos" class="bloco-card escondido">
-                    <h2>Explorar Catálogo por Categoria</h2>
-                    <div class="seletor-grupo-filtro">
-                        <label for="filtro-categoria">Selecionar Categoria:</label>
-                        <select id="filtro-categoria" onchange="filtrarPorCategoria()">
-                            <option value="">-- Escolha uma Categoria --</option>
-                        </select>
-                    </div>
-                    
-                    <div id="lista-produtos-filtrados" class="grid-produtos">
-                        <p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>
-                    </div>
-                </div>
-
-            </section>
+            </div>
 
             <section class="coluna-carrinho bloco-card">
                 <h2>Transmissão de Saída</h2>
