@@ -69,7 +69,7 @@ async function fazerLogin() {
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
             
-            // Carrega os dados dinâmicos do Sheets em paralelo para melhor performance
+            // Carrega os dados dinâmicos após validação bem-sucedida do login
             carregarMensagemBoasVindas();
             carregarCategoriasDinamicas();
         } else {
@@ -158,7 +158,7 @@ async function filtrarPorCategoria() {
         return;
     }
 
-    containerFiltrados.innerHTML = '<p class="carregando">Filtrando categoria no servidor...</p>';
+    containerFiltrados.innerHTML = '<p class="carrinho-vazio">Filtrando categoria no servidor...</p>';
 
     try {
         const params = new URLSearchParams();
@@ -179,11 +179,11 @@ async function filtrarPorCategoria() {
             dadosProdutosFiltrados = resultado.produtos;
             renderizarProdutos(dadosProdutosFiltrados, "lista-produtos-filtrados", "produtos");
         } else {
-            containerFiltrados.innerHTML = `<p class="erro">Erro ao buscar categoria: ${resultado.erro}</p>`;
+            containerFiltrados.innerHTML = `<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro ao buscar categoria: ${resultado.erro}</p>`;
         }
     } catch (erro) {
         console.error("Erro no filtro:", erro);
-        containerFiltrados.innerHTML = '<p class="erro">Erro de rede ao buscar categoria.</p>';
+        containerFiltrados.innerHTML = '<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro de rede ao buscar categoria.</p>';
     }
 }
 
@@ -208,7 +208,7 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto) {
         const estoqueInicial = produto.estoquePorCor[primeiraCor] || 0;
 
         let imagensHTML = "";
-        if (produto.imagens.length > 0) {
+        if (produto.imagens && produto.imagens.length > 0) {
             produto.imagens.forEach((url, index) => {
                 imagensHTML += `<img src="${url}" class="${index === 0 ? 'ativa' : ''}" data-index="${index}" alt="${produto.nome}">`;
             });
@@ -217,7 +217,7 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto) {
         }
 
         let botoesCarrossel = "";
-        if (produto.imagens.length > 1) {
+        if (produto.imagens && produto.imagens.length > 1) {
             botoesCarrossel = `
                 <button class="btn-carrossel btn-prev" onclick="mudarFoto('${idUnicoControle}', ${produto.imagens.length}, -1)">&#10094;</button>
                 <button class="btn-carrossel btn-next" onclick="mudarFoto('${idUnicoControle}', ${produto.imagens.length}, 1)">&#10095;</button>
@@ -295,18 +295,16 @@ function atualizarStatusEstoque(produtoId, prefixoContexto) {
         btnAdd.disabled = false;
     }
 
-    // SINCRO DE IMAGEM DA VARIANTE: Altera a foto do carrossel para a foto da cor escolhida
     const urlImagemCor = produto.imagemPorCor ? produto.imagemPorCor[corSelecionada] : "";
     if (urlImagemCor) {
         const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
         if (carrosselDiv) {
             const imagens = carrosselDiv.querySelectorAll("img");
             imagens.forEach((img, index) => {
-                // Compara a URL da imagem ou verifica se ela contém a parte final do link
                 if (img.src === urlImagemCor || urlImagemCor.includes(img.getAttribute('src'))) {
                     imagens.forEach(i => i.classList.remove("ativa"));
                     img.classList.add("ativa");
-                    indicesImagens[idUnicoControle] = index; // Sincroniza o controle de setas do carrossel
+                    indicesImagens[idUnicoControle] = index;
                 }
             });
         }
@@ -345,20 +343,6 @@ function adicionarAoCarrinho(produtoId, prefixoContexto) {
     atualizarInterfaceCarrinho();
 }
 
-function改变QuantidadeCarrinho(index, alteracao) {
-    const item = carrinho[index];
-    const novaQtd = item.quantidade + alteracao;
-
-    if (novaQtd <= 0) {
-        carrinho.splice(index, 1);
-    } else if (novaQtd <= item.maximo) {
-        item.quantidade = novaQtd;
-    } else {
-        alert("A quantidade excede o estoque real disponível.");
-    }
-    atualizarInterfaceCarrinho();
-}
-
 function alterarQuantidadeCarrinho(index, alteracao) {
     const item = carrinho[index];
     const novaQtd = item.quantidade + alteracao;
@@ -392,9 +376,9 @@ function atualizarInterfaceCarrinho() {
                 <strong>${item.nome}</strong><br>
                 <small>${item.categoriaOrigem} (${item.corSelecionada})</small>
             </div>
-            <div>
+            <div style="display:flex; align-items:center; gap:5px;">
                 <button onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button>
-                <span style="margin: 0 8px; font-weight: bold;">${item.quantidade}</span>
+                <span style="font-weight: bold; min-width:20px; text-align:center;">${item.quantidade}</span>
                 <button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
             </div>
             <button class="btn-remover" onclick="alterarQuantidadeCarrinho(${index}, -${item.quantidade})">Excluir</button>
