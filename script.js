@@ -301,14 +301,32 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
         const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
         if (carrosselDiv) {
             const imagens = carrosselDiv.querySelectorAll("img");
-            imagens.forEach((img, index) => {
+            images.forEach((img, index) => {
                 if (img.src === urlImagemCor || urlImagemCor.includes(img.getAttribute('src'))) {
-                    imagens.forEach(i => i.classList.remove("ativa"));
+                    images.forEach(i => i.classList.remove("ativa"));
                     img.classList.add("ativa");
                     indicesImagens[idUnicoControle] = index;
                 }
             });
         }
+    }
+}
+
+// ==========================================
+// REGRAS INTERATIVAS DA GAVETA MOBILE
+// ==========================================
+function toggleCarrinhoMobile() {
+    const carrinhoGaveta = document.getElementById("carrinho-gaveta");
+    const labelStatus = document.getElementById("label-gaveta-status");
+    
+    if (carrinhoGaveta.classList.contains("aberto")) {
+        carrinhoGaveta.classList.remove("aberto");
+        // Força a atualização do texto do topo exibindo a contagem correta recolhida
+        const totalUnidades = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
+        labelStatus.innerText = totalUnidades === 0 ? "Carrinho Vazio 🛒" : `Ver Itens Selecionados (${totalUnidades} un.) 🔼`;
+    } else {
+        carrinhoGaveta.classList.add("aberto");
+        labelStatus.innerText = "Fechar Carrinho 🔽";
     }
 }
 
@@ -323,7 +341,6 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
     const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
     const estoqueMaximo = mapaEstoque[corSelecionada] || 0;
 
-    // Diferencia itens normais de itens promocionais dentro do array do carrinho
     const itemExistente = carrinho.find(item => item.id === produtoId && item.corSelecionada === corSelecionada && item.promocional === usarEstoquePromo);
 
     if (itemExistente) {
@@ -344,6 +361,15 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
             categoriaOrigem: document.getElementById("filtro-categoria").value
         });
     }
+    
+    // Força a abertura automática da gaveta se o usuário estiver operando em um celular
+    if (window.innerWidth <= 850) {
+        const carrinhoGaveta = document.getElementById("carrinho-gaveta");
+        if (!carrinhoGaveta.classList.contains("aberto")) {
+            toggleCarrinhoMobile();
+        }
+    }
+
     atualizarInterfaceCarrinho();
 }
 
@@ -356,19 +382,70 @@ function alterarQuantidadeCarrinho(index, alteracao) {
     } else if (novaQtd <= item.maximo) {
         item.quantidade = novaQtd;
     } else {
-        alert("A quantidade excede o estoque real disponível.");
+        alert(`A quantidade excede o estoque real disponível (${item.maximo} un.).`);
     }
+    atualizarInterfaceCarrinho();
+}
+
+// Nova funcionalidade: Abre o campo input para digitação imediata ao clicar 2x
+function habilitarEdicaoDireta(index) {
+    const containerQtd = document.getElementById(`qtd-container-${index}`);
+    const item = carrinho[index];
+    
+    containerQtd.innerHTML = `
+        <input type="number" id="input-rapido-${index}" class="input-qtd-rapido" 
+               value="${item.quantidade}" min="1" max="${item.maximo}"
+               onblur="salvarQuantidadeDigitada(${index})" 
+               onkeydown="if(event.key === 'Enter') salvarQuantidadeDigitada(${index})">
+    `;
+    
+    const inputField = document.getElementById(`input-rapido-${index}`);
+    inputField.focus();
+    inputField.select(); // Deixa o número selecionado para apenas digitar o novo em cima
+}
+
+// Processa o valor numérico digitado em lote
+function salvarQuantidadeDigitada(index) {
+    const inputField = document.getElementById("input-rapido-" + index);
+    if (!inputField) return;
+
+    let valorDigitado = parseInt(inputField.value, 10);
+    const item = carrinho[index];
+
+    if (isNaN(valorDigitado) || valorDigitado <= 0) {
+        carrinho.splice(index, 1); // Exclui caso apague tudo ou deixe zerado
+    } else if (valorDigitado <= item.maximo) {
+        item.quantidade = valorDigitado;
+    } else {
+        alert(`Quantidade indisponível! Ajustado para o limite máximo de estoque (${item.maximo} un.).`);
+        item.quantidade = item.maximo;
+    }
+    
     atualizarInterfaceCarrinho();
 }
 
 function atualizarInterfaceCarrinho() {
     const container = document.getElementById("itens-carrinho");
     const btnConfirmar = document.getElementById("btn-confirmar");
+    const badgeContador = document.getElementById("badge-contador-carrinho");
+    const labelStatus = document.getElementById("label-gaveta-status");
+
+    const totalUnidadesFisicas = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
+
+    if (badgeContador) badgeContador.innerText = totalUnidadesFisicas;
 
     if (carrinho.length === 0) {
         container.innerHTML = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
         btnConfirmar.disabled = true;
+        if (labelStatus) labelStatus.innerText = "Carrinho Vazio 🛒";
+        
+        // Se o carrinho esvaziar completamente no mobile, recolhe por estética
+        document.getElementById("carrinho-gaveta").classList.remove("aberto");
         return;
+    }
+
+    if (labelStatus && !document.getElementById("carrinho-gaveta").classList.contains("aberto")) {
+        labelStatus.innerText = `Ver Itens Selecionados (${totalUnidadesFisicas} un.) 🔼`;
     }
 
     container.innerHTML = "";
@@ -380,9 +457,11 @@ function atualizarInterfaceCarrinho() {
                 <strong>${item.nome}</strong><br>
                 <small>${item.categoriaOrigem} (${item.corSelecionada})</small>
             </div>
-            <div style="display:flex; align-items:center; gap:5px;">
+            <div style="display:flex; align-items:center; gap:5px;" id="qtd-container-${index}">
                 <button onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button>
-                <span style="font-weight: bold; min-width:20px; text-align:center;">${item.quantidade}</span>
+                <span style="font-weight: bold; min-width:30px; text-align:center; cursor: pointer; user-select:none;" 
+                      title="Clique duas vezes para digitar" 
+                      ondblclick="habilitarEdicaoDireta(${index})">${item.quantidade}</span>
                 <button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
             </div>
             <button style="background-color: #ff4d4d; color: white;" onclick="alterarQuantidadeCarrinho(${index}, -${item.quantidade})">Excluir</button>
@@ -411,7 +490,7 @@ async function confirmarBaixa() {
                 tipo: item.categoriaOrigem,
                 usuario: usuarioLogado,
                 localizacao: localizacao,
-                isPromo: item.promocional, // Passa o estado booleano para a nova regra da API do codigo.gs
+                isPromo: item.promocional, 
                 carrinho: [item]
             }));
 
