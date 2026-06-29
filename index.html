@@ -54,6 +54,13 @@
                         <option value="">-- Escolha uma Categoria --</option>
                     </select>
                 </div>
+
+                <div style="margin: -5px 0 20px 0; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="filtro-promocional" onchange="aplicarFiltroVisual()" style="width: 18px; height: 18px; cursor: pointer;">
+                    <label for="filtro-promocional" style="font-size: 14px; font-weight: bold; color: var(--cor-principal); cursor: pointer; user-select: none; display: flex; align-items: center; gap: 4px;">
+                        Promocional 🏷️
+                    </label>
+                </div>
                 
                 <div id="lista-produtos-filtrados" class="grid-produtos">
                     <p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>
