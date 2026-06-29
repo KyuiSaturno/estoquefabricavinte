@@ -14,7 +14,6 @@ function alternarAba(abaDestino) {
     const abaProdutos = document.getElementById("aba-produtos");
     const btnProdutos = document.getElementById("btn-aba-produtos");
 
-    // Mantido para compatibilidade caso o login acione a função, focando sempre no Catálogo
     if (abaDestino === 'produtos' || abaDestino === 'inicio') {
         if (abaProdutos) abaProdutos.classList.remove("escondido");
         if (btnProdutos) btnProdutos.classList.add("ativa");
@@ -57,16 +56,15 @@ async function fazerLogin() {
 
         if (resultado.sucesso) {
             usuarioLogado = usuarioInput;
-            document.getElementById("nome-operador").innerText = `Usuário: ${usuarioLogado}`;
             
-            // Faz a troca de telas ocultando o login e revelando o painel
+            // Alimenta os seletores de identificação do operador (Tanto do PC quanto da Barra Mobile)
+            document.getElementById("nome-operador-pc").innerText = `Usuário: ${usuarioLogado}`;
+            document.getElementById("nome-operador-mobile").innerText = usuarioLogado;
+            
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
             
-            // Força a aba do catálogo a ficar visualmente ativa por segurança
             alternarAba('produtos');
-            
-            // Carrega a listagem das abas/categorias vindas da Planilha
             carregarCategoriasDinamicas();
         } else {
             erroLogin.innerText = resultado.erro || "Usuário ou senha incorretos.";
@@ -108,7 +106,6 @@ async function carregarCategoriasDinamicas() {
                 opcao.innerText = aba;
                 seletor.appendChild(opcao);
             });
-            console.log("Categorias carregadas com sucesso:", resultado.abas);
         }
     } catch (erro) {
         console.error("Erro ao carregar categorias dinâmicas:", erro);
@@ -146,10 +143,9 @@ async function filtrarPorCategoria() {
 
         if (resultado.sucesso) {
             dadosProdutosFiltrados = resultado.produtos;
-            // Executa o filtro visual baseado no estado atual da caixinha promocional
             aplicarFiltroVisual();
         } else {
-            containerFiltrados.innerHTML = `<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro ao buscar categoria: ${resultado.erro}</p>`;
+            containerFiltrados.innerHTML = `<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro ao buscar categoria: ${resultado.erro}</p>';`
         }
     } catch (erro) {
         console.error("Erro no filtro:", erro);
@@ -157,13 +153,11 @@ async function filtrarPorCategoria() {
     }
 }
 
-// Executa a filtragem local sem precisar reconsultar o servidor
 function aplicarFiltroVisual() {
     const filtroPromoCheckbox = document.getElementById("filtro-promocional");
     const apenasPromocionais = filtroPromoCheckbox ? filtroPromoCheckbox.checked : false;
     
     if (apenasPromocionais) {
-        // Mantém apenas os modelos que contêm variação com estoque promocional maior que 0
         const produtosPromocionais = dadosProdutosFiltrados.filter(produto => {
             if (!produto.estoquePromocional) return false;
             return Object.values(produto.estoquePromocional).some(qtd => qtd > 0);
@@ -190,12 +184,10 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
             indicesImagens[idUnicoControle] = 0;
         }
 
-        // Determina qual mapa de estoque ler
         const mapaEstoqueAlvo = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
         if (!mapaEstoqueAlvo) return;
 
         const coresTotais = Object.keys(mapaEstoqueAlvo);
-        // Se estiver no modo promo, filtra no select para exibir apenas as cores que têm estoque promocional de fato
         const coresDisponiveis = usarEstoquePromo ? coresTotais.filter(cor => (mapaEstoqueAlvo[cor] || 0) > 0) : coresTotais;
         
         if (coresDisponiveis.length === 0) return;
@@ -225,7 +217,6 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
             coresOpcoes += `<option value="${cor}">${cor}</option>`;
         });
 
-        // Adiciona um selo visual discreto de "PROMO" no topo do carrossel se a caixinha estiver ativa
         const tagPromoHTML = usarEstoquePromo ? `<div style="position: absolute; top: 10px; left: 10px; background-color: var(--cor-erro); color: white; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">Promoção</div>` : '';
 
         const cartao = document.createElement("div");
@@ -313,25 +304,20 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
 }
 
 // ==========================================
-// REGRAS INTERATIVAS DA GAVETA MOBILE
+// INTERATIVIDADE DA GAVETA MOBILE STYLE
 // ==========================================
 function toggleCarrinhoMobile() {
     const carrinhoGaveta = document.getElementById("carrinho-gaveta");
-    const labelStatus = document.getElementById("label-gaveta-status");
     
     if (carrinhoGaveta.classList.contains("aberto")) {
         carrinhoGaveta.classList.remove("aberto");
-        // Força a atualização do texto do topo exibindo a contagem correta recolhida
-        const totalUnidades = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
-        labelStatus.innerText = totalUnidades === 0 ? "Carrinho Vazio 🛒" : `Ver Itens Selecionados (${totalUnidades} un.) 🔼`;
     } else {
         carrinhoGaveta.classList.add("aberto");
-        labelStatus.innerText = "Fechar Carrinho 🔽";
     }
 }
 
 // ==========================================
-// REGRAS DO CARRINHO DE TRANSMISSÃO
+// REGRAS DE OPERAÇÃO DO CARRINHO
 // ==========================================
 function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
@@ -362,11 +348,11 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
         });
     }
     
-    // Força a abertura automática da gaveta se o usuário estiver operando em um celular
+    // Abre a gaveta de baixo de forma automática ao escolher o primeiro item (Mobile)
     if (window.innerWidth <= 850) {
         const carrinhoGaveta = document.getElementById("carrinho-gaveta");
         if (!carrinhoGaveta.classList.contains("aberto")) {
-            toggleCarrinhoMobile();
+            carrinhoGaveta.classList.add("aberto");
         }
     }
 
@@ -387,7 +373,6 @@ function alterarQuantidadeCarrinho(index, alteracao) {
     atualizarInterfaceCarrinho();
 }
 
-// Nova funcionalidade: Abre o campo input para digitação imediata ao clicar 2x
 function habilitarEdicaoDireta(index) {
     const containerQtd = document.getElementById(`qtd-container-${index}`);
     const item = carrinho[index];
@@ -401,10 +386,9 @@ function habilitarEdicaoDireta(index) {
     
     const inputField = document.getElementById(`input-rapido-${index}`);
     inputField.focus();
-    inputField.select(); // Deixa o número selecionado para apenas digitar o novo em cima
+    inputField.select();
 }
 
-// Processa o valor numérico digitado em lote
 function salvarQuantidadeDigitada(index) {
     const inputField = document.getElementById("input-rapido-" + index);
     if (!inputField) return;
@@ -413,7 +397,7 @@ function salvarQuantidadeDigitada(index) {
     const item = carrinho[index];
 
     if (isNaN(valorDigitado) || valorDigitado <= 0) {
-        carrinho.splice(index, 1); // Exclui caso apague tudo ou deixe zerado
+        carrinho.splice(index, 1);
     } else if (valorDigitado <= item.maximo) {
         item.quantidade = valorDigitado;
     } else {
@@ -428,24 +412,21 @@ function atualizarInterfaceCarrinho() {
     const container = document.getElementById("itens-carrinho");
     const btnConfirmar = document.getElementById("btn-confirmar");
     const badgeContador = document.getElementById("badge-contador-carrinho");
-    const labelStatus = document.getElementById("label-gaveta-status");
 
     const totalUnidadesFisicas = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
 
+    // Sincroniza o número vermelho flutuante
     if (badgeContador) badgeContador.innerText = totalUnidadesFisicas;
 
     if (carrinho.length === 0) {
         container.innerHTML = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
         btnConfirmar.disabled = true;
-        if (labelStatus) labelStatus.innerText = "Carrinho Vazio 🛒";
         
-        // Se o carrinho esvaziar completamente no mobile, recolhe por estética
-        document.getElementById("carrinho-gaveta").classList.remove("aberto");
+        // Se esvaziado por completo no mobile, fecha a gaveta de forma automática
+        if (window.innerWidth <= 850) {
+            document.getElementById("carrinho-gaveta").classList.remove("aberto");
+        }
         return;
-    }
-
-    if (labelStatus && !document.getElementById("carrinho-gaveta").classList.contains("aberto")) {
-        labelStatus.innerText = `Ver Itens Selecionados (${totalUnidadesFisicas} un.) 🔼`;
     }
 
     container.innerHTML = "";
@@ -510,7 +491,7 @@ async function confirmarBaixa() {
     } catch (erro) {
         console.error("Erro na baixa:", erro);
         alert("Erro crítico ao sincronizar os dados de saída.");
-        btnConfirmar.innerText = "Confirmar";
+        btnConfirmar.innerText = "Confirmar Transmissão";
         btnConfirmar.disabled = false;
     }
 }
