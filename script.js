@@ -8,24 +8,16 @@ let carrinho = [];
 let indicesImagens = {}; 
 
 // ==========================================
-// CONTROLADOR DE NAVEGAÇÃO (ABAS ANIMADAS)
+// CONTROLADOR DE NAVEGAÇÃO INTERNA
 // ==========================================
 function alternarAba(abaDestino) {
-    const abaInicio = document.getElementById("aba-inicio");
     const abaProdutos = document.getElementById("aba-produtos");
-    const btnInicio = document.getElementById("btn-aba-inicio");
     const btnProdutos = document.getElementById("btn-aba-produtos");
 
-    if (abaDestino === 'inicio') {
-        abaProdutos.classList.add("escondido");
-        abaInicio.classList.remove("escondido");
-        btnProdutos.classList.remove("ativa");
-        btnInicio.classList.add("ativa");
-    } else if (abaDestino === 'produtos') {
-        abaInicio.classList.add("escondido");
-        abaProdutos.classList.remove("escondido");
-        btnInicio.classList.remove("ativa");
-        btnProdutos.classList.add("ativa");
+    // Mantido para compatibilidade caso o login acione a função, focando sempre no Catálogo
+    if (abaDestino === 'produtos' || abaDestino === 'inicio') {
+        if (abaProdutos) abaProdutos.classList.remove("escondido");
+        if (btnProdutos) btnProdutos.classList.add("ativa");
     }
 }
 
@@ -66,11 +58,15 @@ async function fazerLogin() {
         if (resultado.sucesso) {
             usuarioLogado = usuarioInput;
             document.getElementById("nome-operador").innerText = `Usuário: ${usuarioLogado}`;
+            
+            // Faz a troca de telas ocultando o login e revelando o painel
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
             
-            // Carrega os dados dinâmicos após validação bem-sucedida do login
-            carregarMensagemBoasVindas();
+            // Força a aba do catálogo a ficar visualmente ativa por segurança
+            alternarAba('produtos');
+            
+            // Carrega a listagem das abas/categorias vindas da Planilha
             carregarCategoriasDinamicas();
         } else {
             erroLogin.innerText = resultado.erro || "Usuário ou senha incorretos.";
@@ -82,33 +78,6 @@ async function fazerLogin() {
         erroLogin.innerText = "Erro ao conectar com o servidor.";
         btnLogin.innerText = "Entrar";
         btnLogin.disabled = false;
-    }
-}
-
-// ==========================================
-// BUSCA DA FRASE DE BOAS VINDAS DO SHEETS
-// ==========================================
-async function carregarMensagemBoasVindas() {
-    const caixaTexto = document.getElementById("texto-boas-vindas");
-    try {
-        const params = new URLSearchParams();
-        params.append("dados", JSON.stringify({ acao: "obterConfiguracoes" }));
-
-        const resposta = await fetch(WEB_APP_URL, {
-            method: "POST",
-            body: params,
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
-        });
-
-        const resultado = await resposta.json();
-        if (resultado.sucesso) {
-            caixaTexto.innerText = resultado.mensagemBoasVindas;
-        } else {
-            caixaTexto.innerText = "Bem-vindo de volta! Ótimo dia de trabalho.";
-        }
-    } catch (erro) {
-        console.error("Erro ao carregar mensagem:", erro);
-        caixaTexto.innerText = "Bem-vindo de volta! Ótimo dia de trabalho.";
     }
 }
 
@@ -381,7 +350,7 @@ function atualizarInterfaceCarrinho() {
                 <span style="font-weight: bold; min-width:20px; text-align:center;">${item.quantidade}</span>
                 <button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
             </div>
-            <button class="btn-remover" onclick="alterarQuantidadeCarrinho(${index}, -${item.quantidade})">Excluir</button>
+            <button style="background-color: #ff4d4d; color: white;" onclick="alterarQuantidadeCarrinho(${index}, -${item.quantidade})">Excluir</button>
         `;
         container.appendChild(linha);
     });
@@ -426,7 +395,7 @@ async function confirmarBaixa() {
     } catch (erro) {
         console.error("Erro na baixa:", erro);
         alert("Erro crítico ao sincronizar os dados de saída.");
-        btnConfirmar.innerText = "Confirmar Baixa no Estoque";
+        btnConfirmar.innerText = "Confirmar";
         btnConfirmar.disabled = false;
     }
 }
