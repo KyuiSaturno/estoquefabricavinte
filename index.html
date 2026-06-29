@@ -36,7 +36,7 @@
                 <span class="logo-texto">JERI 20</span>
             </div>
             <div class="usuario-status">
-                <span id="nome-operador">Usuário: Carregando...</span>
+                <span id="nome-operador-pc">Usuário: Carregando...</span>
             </div>
         </header>
 
@@ -68,13 +68,12 @@
             </div>
 
             <section id="carrinho-gaveta" class="coluna-carrinho bloco-card">
-                
-                <button type="button" class="btn-toggle-gaveta" onclick="toggleCarrinhoMobile()">
-                    <span id="label-gaveta-status">Carrinho Vazio 🛒</span>
-                    <span id="badge-contador-carrinho" style="background: var(--cor-erro); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold;">0</span>
-                </button>
+                <div class="gaveta-header-mobile">
+                    <div class="indicador-gesto"></div>
+                    <h2>Resumo da Saída</h2>
+                </div>
 
-                <h2>Transmissão de Saída</h2>
+                <h2 class="titulo-desktop">Transmissão de Saída</h2>
                 
                 <div class="seletor-grupo" style="margin-top: 10px;">
                     <label for="localizacao">Destino da Mercadoria:</label>
@@ -93,10 +92,30 @@
                 </div>
 
                 <button id="btn-confirmar" class="btn-confirmar-baixa" onclick="confirmarBaixa()" disabled>
-                    Confirmar
+                    Confirmar Transmissão
                 </button>
             </section>
         </main>
+
+        <nav class="barra-inferior-mobile">
+            <div class="item-nav-mobile ativa">
+                <span class="icone-nav">📦</span>
+                <span class="label-nav">Catálogo</span>
+            </div>
+            
+            <div class="item-nav-mobile btn-carrinho-central" onclick="toggleCarrinhoMobile()">
+                <div class="wrapper-icone-carrinho">
+                    <span class="icone-nav">🛒</span>
+                    <span id="badge-contador-carrinho" class="badge-contador">0</span>
+                </div>
+                <span class="label-nav">Carrinho</span>
+            </div>
+            
+            <div class="item-nav-mobile">
+                <span class="icone-nav">👤</span>
+                <span id="nome-operador-mobile" class="label-nav">Operador</span>
+            </div>
+        </nav>
     </div>
 
     <script src="script.js"></script>
