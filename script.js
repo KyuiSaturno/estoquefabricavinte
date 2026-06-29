@@ -275,6 +275,7 @@ function mudarFoto(idUnicoControle, totalFotos, direcao) {
 function atualizarStatusEstoque(produtoId, prefixoContexto) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
     const produto = dadosProdutosFiltrados.find(p => p.id === produtoId);
+    if (!produto) return;
     
     const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
     const qtdDisponivel = produto.estoquePorCor[corSelecionada] || 0;
@@ -292,6 +293,23 @@ function atualizarStatusEstoque(produtoId, prefixoContexto) {
         statusP.classList.remove("sem-estoque");
         btnAdd.innerText = "Selecionar Peça";
         btnAdd.disabled = false;
+    }
+
+    // SINCRO DE IMAGEM DA VARIANTE: Altera a foto do carrossel para a foto da cor escolhida
+    const urlImagemCor = produto.imagemPorCor ? produto.imagemPorCor[corSelecionada] : "";
+    if (urlImagemCor) {
+        const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
+        if (carrosselDiv) {
+            const imagens = carrosselDiv.querySelectorAll("img");
+            imagens.forEach((img, index) => {
+                // Compara a URL da imagem ou verifica se ela contém a parte final do link
+                if (img.src === urlImagemCor || urlImagemCor.includes(img.getAttribute('src'))) {
+                    imagens.forEach(i => i.classList.remove("ativa"));
+                    img.classList.add("ativa");
+                    indicesImagens[idUnicoControle] = index; // Sincroniza o controle de setas do carrossel
+                }
+            });
+        }
     }
 }
 
