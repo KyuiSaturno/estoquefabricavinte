@@ -1,94 +1,66 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Estoque - Jeri 20</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <div id="tela-login" class="container-login">
-        <div class="login-logo">Jeri 20</div>
-        <p class="login-subtitulo">Controle de Estoque Interno</p>
-        
-        <div class="campo-grupo">
-            <label for="usuario">Operador</label>
-            <input type="text" id="usuario" placeholder="Digite seu usuário">
-        </div>
-        
-        <div class="campo-grupo">
-            <label for="senha">Senha</label>
-            <input type="password" id="senha" placeholder="••••••••">
-        </div>
-        
-        <button id="btn-login" class="btn-principal" onclick="fazerLogin()">Entrar</button>
-        <p id="erro-login" class="erro-mensagem"></p>
-    </div>
-
-    <div id="painel-principal" class="painel-loja escondido">
-        
-        <header class="topo-painel">
-            <div class="topo-esquerda">
-                <img src="https://images.squarespace-cdn.com/content/v1/60f84693a7fa4830ba79df49/1626899144414-0WZ6E6E6E6E6E6E6E6E6/images+%281%29.jpg" alt="Jeri 20 Logo" class="logo-topo" onerror="this.style.display='none'; document.getElementById('logo-texto').style.display='block';">
-                <span id="logo-texto" class="logo-texto-alt" style="display:none;">JERI 20</span>
-                
-                <nav class="menu-navegacao">
-                    <button id="btn-aba-estoque" class="btn-aba ativa" onclick="alternarAba('estoque')">Estoque</button>
-                    <button id="btn-aba-produtos" class="btn-aba" onclick="alternarAba('produtos')">Produtos</button>
-                </nav>
+<div id="painel-principal" class="escondido">
+        <header class="barra-superior">
+            <div class="logo-area">
+                <span class="logo-texto">JERI 20</span>
             </div>
-            
-            <div class="operador-tag" id="nome-operador">Usuário: -</div>
+            <div class="usuario-status">
+                <span id="nome-operador">Usuário: Carregando...</span>
+            </div>
         </header>
 
-        <main id="aba-estoque" class="conteudo-aba fade-in">
-            <div class="vitrine-container">
-                <div class="grid-produtos" id="lista-produtos">
-                    </div>
-            </div>
-        </main>
+        <nav class="abas-navegacao">
+            <button id="btn-aba-inicio" class="btn-aba ativa" onclick="alternarAba('inicio')">Início</button>
+            <button id="btn-aba-produtos" class="btn-aba" onclick="alternarAba('produtos')">Catálogo de Produtos</button>
+        </nav>
 
-        <main id="aba-produtos" class="conteudo-aba escondido fade-in">
-            <div class="filtro-container">
-                <h2>Explorar Catálogo por Categoria</h2>
+        <main class="conteudo-principal">
+            <section class="coluna-conteudo">
+                
+                <div id="aba-inicio" class="bloco-card">
+                    <h2 class="titulo-boas-vindas">Painel de Controle</h2>
+                    <div class="caixa-mensagem-boas-vindas">
+                        <p id="texto-boas-vindas">Carregando mensagem do dia...</p>
+                    </div>
+                </div>
+
+                <div id="aba-produtos" class="bloco-card escondido">
+                    <h2>Explorar Catálogo por Categoria</h2>
+                    <div class="seletor-grupo-filtro">
+                        <label for="filtro-categoria">Selecionar Categoria:</label>
+                        <select id="filtro-categoria" onchange="filtrarPorCategoria()">
+                            <option value="">-- Escolha uma Categoria --</option>
+                        </select>
+                    </div>
+                    
+                    <div id="lista-produtos-filtrados" class="grid-produtos">
+                        <p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>
+                    </div>
+                </div>
+
+            </section>
+
+            <section class="coluna-carrinho bloco-card">
+                <h2>Transmissão de Saída</h2>
+                
                 <div class="seletor-grupo">
-                    <label for="filtro-categoria">Selecionar Categoria:</label>
-                    <select id="filtro-categoria" onchange="filtrarPorCategoria()">
-                        <option value="">-- Escolha uma Categoria --</option>
+                    <label for="localizacao">Destino da Mercadoria:</label>
+                    <select id="localizacao">
+                        <option value="Loja Física Jeri">Loja Física Jeri</option>
+                        <option value="Loja Física Jijoca">Loja Física Jijoca</option>
+                        <option value="Envio de Pedido">Envio de Pedido</option>
                     </select>
                 </div>
-                
-                <div class="grid-produtos" id="lista-produtos-filtrados" style="margin-top: 25px;">
-                    <p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>
+
+                <div class="divisor"></div>
+
+                <h3>Itens Selecionados</h3>
+                <div id="itens-carrinho">
+                    <p class="carrinho-vazio">Nenhum item selecionado.</p>
                 </div>
-            </div>
+
+                <button id="btn-confirmar" class="btn-confirmar-baixa" onclick="confirmarBaixa()" disabled>
+                    Confirmar
+                </button>
+            </section>
         </main>
-
-        <aside class="lateral-controle">
-            <h2>Retirada de Material</h2>
-            
-            <div class="seletor-grupo">
-                <label for="localizacao">Destino da Carga:</label>
-                <select id="localizacao">
-                    <option value="Loja Física - Jeri">Loja Física - Jeri</option>
-                    <option value="Loja Física - Jijoca">Loja Física - Jijoca</option>
-                    <option value="Venda">Venda</option>
-                    <option value="Serigrafia">Serigrafia</option>
-                </select>
-            </div>
-
-            <div class="container-itens-baixa" id="itens-carrinho">
-                <p class="carrinho-vazio">Nenhum item selecionado.</p>
-            </div>
-
-            <button id="btn-confirmar" class="btn-principal" onclick="confirmarBaixa()" disabled>
-                Confirmar Baixa no Estoque
-            </button>
-        </aside>
-
     </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
