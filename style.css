@@ -1,96 +1,650 @@
 /* ==========================================
-   CONFIGURAÇÃO DE CORES E BASE (JERI 20)
+   CONFIGURAÇÃO DE CORES E IDENTIDADE (JERI 20)
    ========================================== */
 :root {
-    --cor-principal: #F4C414;
-    --cor-fundo-escuro: #1A1A1A;
-    --cor-fundo-card: #262626;
-    --cor-texto-claro: #FFFFFF;
-    --cor-texto-escuro: #111111;
-    --cor-erro: #FF4D4D;
-    --cor-sucesso: #2ECC71;
+    --cor-principal: #F4C414;    /* Amarelo Jeri 20 */
+    --cor-fundo-escuro: #1A1A1A; /* Grafite escuro para contraste */
+    --cor-fundo-card: #262626;   /* Cinza escuro para os cartões */
+    --cor-texto-claro: #FFFFFF;  /* Branco para legibilidade */
+    --cor-texto-escuro: #111111; /* Preto para botões amarelos */
+    --cor-erro: #FF4D4D;         /* Vermelho para alertas */
+    --cor-sucesso: #2ECC71;      /* Verde para estoque disponível */
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+/* Base do Site */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-body { background-color: var(--cor-fundo-escuro); color: var(--cor-texto-claro); min-height: 100vh; }
+body {
+    background-color: var(--cor-fundo-escuro);
+    color: var(--cor-texto-claro);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+}
 
-.escondido { display: none !important; }
+.escondido {
+    display: none !important;
+}
 
 /* ==========================================
-   LOGIN (Corrigido para sempre aparecer)
+   PAINEL PRINCIPAL E ESTRUTURA DE COLUNAS
    ========================================== */
+#painel-principal {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: surgimentoSuave 0.4s ease forwards;
+}
+
+/* Barra Superior (Header - PC) */
+.barra-superior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--cor-fundo-card);
+    padding: 20px 30px;
+    border-radius: 10px;
+    border-left: 5px solid var(--cor-principal);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.logo-texto {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--cor-principal);
+    letter-spacing: 1px;
+}
+
+.usuario-status {
+    background-color: #1A1A1A;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid #333333;
+}
+
+/* Menu de Abas de Navegação (PC) */
+.abas-navegacao {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid #333333;
+    padding-bottom: 2px;
+}
+
+.btn-aba {
+    background-color: transparent;
+    color: #888888;
+    border: none;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-aba.ativa {
+    color: var(--cor-principal);
+    border-bottom-color: var(--cor-principal);
+}
+
+/* Área de Conteúdo Principal */
+.conteudo-principal {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 25px;
+    align-items: start;
+}
+
+.bloco-card {
+    background-color: var(--cor-fundo-card);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 1px solid #333333;
+}
+
+.bloco-card h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: var(--cor-texto-claro);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Elementos de Cabeçalho/Rodapé Mobile (Escondidos no PC) */
+.gaveta-header-mobile, .barra-inferior-mobile {
+    display: none;
+}
+
+/* ==========================================
+   VITRINE DE PRODUTOS E FILTROS
+   ========================================== */
+.seletor-grupo-filtro {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.seletor-grupo-filtro label, .seletor-grupo label {
+    display: block;
+    font-size: 12px;
+    color: #AAAAAA;
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.seletor-grupo-filtro select, .seletor-grupo select {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #1A1A1A;
+    border: 1px solid #444444;
+    border-radius: 6px;
+    color: var(--cor-texto-claro);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.seletor-grupo-filtro select:focus, .seletor-grupo select:focus {
+    border-color: var(--cor-principal);
+}
+
+.grid-produtos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.cartao-produto {
+    background-color: #1A1A1A;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #333333;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    padding: 12px;
+    height: 100%;
+}
+
+.cartao-produto:hover {
+    transform: translateY(-4px);
+    border-color: var(--cor-principal);
+}
+
+.carrossel {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    background-color: #111111;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.carrossel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.carrossel img.ativa {
+    display: block;
+}
+
+.btn-carrossel {
+    position: absolute;
+    top: auto;
+    bottom: 12px;
+    transform: none;
+    background-color: rgba(0, 0, 0, 0.65);
+    color: var(--cor-principal);
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-carrossel:hover {
+    background-color: var(--cor-principal);
+    color: var(--cor-texto-escuro);
+    transform: scale(1.05);
+}
+
+.btn-prev { left: 12px; right: auto; }
+.btn-next { right: 12px; left: auto; }
+
+.info-produto {
+    padding: 12px 4px 4px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.info-produto h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cor-texto-claro);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.estoque-status {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cor-sucesso);
+}
+
+.estoque-status span {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.estoque-status.sem-estoque {
+    color: var(--cor-erro);
+}
+
+.btn-adicionar {
+    width: 100%;
+    padding: 10px;
+    background-color: transparent;
+    color: var(--cor-principal);
+    border: 2px solid var(--cor-principal);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: auto;
+}
+
+.btn-adicionar:hover {
+    background-color: var(--cor-principal);
+    color: var(--cor-texto-escuro);
+}
+
+/* ==========================================
+   COLUNA LATERAL: TRANSMISSÃO DE SAÍDA (PC)
+   ========================================== */
+.coluna-carrinho h2.titulo-desktop {
+    color: var(--cor-principal) !important;
+    border-bottom: 2px solid #333333;
+    padding-bottom: 10px;
+}
+
+.divisor {
+    height: 1px;
+    background-color: #333333;
+    margin: 15px 0;
+}
+
+.coluna-carrinho h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #AAAAAA;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+#itens-carrinho {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.carrinho-vazio {
+    color: #666666;
+    font-style: italic;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 13px;
+}
+
+.item-carrinho-linha {
+    background-color: #1A1A1A;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #333333;
+    font-size: 13px;
+}
+
+.item-carrinho-linha button {
+    background-color: #333333;
+    color: white;
+    border: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.item-carrinho-linha button:hover {
+    background-color: var(--cor-principal);
+    color: var(--cor-texto-escuro);
+}
+
+.input-qtd-rapido {
+    width: 60px;
+    padding: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    background-color: #111111;
+    color: #FFFFFF;
+    border: 2px solid var(--cor-principal);
+    border-radius: 4px;
+    outline: none;
+}
+
+.btn-confirmar-baixa {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--cor-principal);
+    color: var(--cor-texto-escuro);
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-confirmar-baixa:hover:not(:disabled) {
+    background-color: #E0B30F;
+}
+
+.btn-confirmar-baixa:disabled {
+    background-color: #444444;
+    color: #777777;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   RECONSTRUÇÃO COMPLETA: INTERFACE NATIVA APP (MOBILE)
+   ========================================== */
+
+@media (max-width: 1100px) {
+    .grid-produtos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+}
+
+@media (max-width: 850px) {
+    body {
+        padding: 10px 10px 90px 10px !important; /* Respiro obrigatório no rodapé */
+        display: block;
+    }
+
+    /* Oculta sumariamente elementos desnecessários na visualização mobile */
+    .barra-superior, .coluna-carrinho h2.titulo-desktop, .abas-navegacao {
+        display: none !important;
+    }
+
+    /* Destrava o Grid horizontal de PC para fluxo linear empilhado */
+    .conteudo-principal {
+        display: block !important;
+        width: 100%;
+    }
+
+    #aba-produtos {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    /* BARRA INFERIOR DE ABAS TOTALMENTE FIXA (ESTILO INSTAGRAM) */
+    .barra-inferior-mobile {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 65px;
+        background-color: rgba(38, 38, 38, 0.96) !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-top: 1px solid #333333;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 10000 !important; /* Permanece fixo sobrepondo a gaveta */
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .item-nav-mobile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #888888;
+        cursor: pointer;
+        flex: 1;
+        height: 100%;
+        transition: color 0.2s ease;
+    }
+
+    .item-nav-mobile.ativa {
+        color: var(--cor-principal);
+    }
+
+    .icone-nav {
+        font-size: 20px;
+        margin-bottom: 2px;
+    }
+
+    .label-nav {
+        font-size: 11px;
+        font-weight: 600;
+        max-width: 90px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* DESIGN PREMIUM DO BOTÃO DE ACESSO CENTRAL DO CARRINHO */
+    .btn-carrinho-central {
+        position: relative;
+        top: -8px; /* Sobe o círculo flutuante */
+        background: #1a1a1a !important;
+        border-radius: 50%;
+        height: 60px;
+        max-width: 60px;
+        border: 1px solid #333333;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.4);
+    }
+
+    .wrapper-icone-carrinho {
+        position: relative;
+        display: inline-block;
+    }
+
+    .badge-contador {
+        position: absolute;
+        top: -6px;
+        right: -12px;
+        background-color: var(--cor-erro);
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #1a1a1a;
+        padding: 2px;
+    }
+
+    /* DESIGN DA GAVETA DE SAÍDA (SLIDE-UP DRAWER) */
+    .coluna-carrinho {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important; /* Renderiza exatamente abaixo do menu fixo */
+        margin: 0;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
+        background-color: #212121;
+        max-height: 75vh;
+        display: flex;
+        flex-direction: column;
+        padding: 15px 20px 80px 20px; /* Padding inferior estendido para não encavalar nos botões */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateY(100%); /* Escondido por padrão na base do display */
+    }
+
+    .coluna-carrinho.aberto {
+        transform: translateY(0) !important; /* Sobe suavemente para exibição */
+    }
+
+    /* Topo interno decorativo da Gaveta Mobile */
+    .gaveta-header-mobile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .indicador-gesto {
+        width: 40px;
+        height: 4px;
+        background-color: #444444;
+        border-radius: 2px;
+        margin-bottom: 12px;
+    }
+
+    .gaveta-header-mobile h2 {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--cor-principal);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Área de Rolagem Confortável interna para itens adicionados */
+    #itens-carrinho {
+        overflow-y: auto;
+        flex: 1;
+        max-height: 260px;
+        margin-bottom: 15px;
+    }
+
+    /* Vitrine Mobile Estável: Sempre 2 modelos paralelos por linha */
+    .grid-produtos {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .carrossel {
+        height: 150px !important; /* Altura controlada para não esconder a grade técnica */
+    }
+
+    .cartao-produto {
+        padding: 10px;
+    }
+
+    .info-produto {
+        gap: 6px;
+    }
+
+    .info-produto h3 {
+        font-size: 13px;
+    }
+
+    .btn-adicionar {
+        font-size: 11px;
+        padding: 8px;
+    }
+}
+
+/* Telas compactas em modo vertical */
+@media (max-width: 440px) {
+    .grid-produtos {
+        grid-template-columns: 1fr !important;
+    }
+    .carrossel {
+        height: 200px !important;
+    }
+}
+
+/* Animações de Transição */
+@keyframes surgimentoSuave {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilização Completa do Cartão de Login */
 .bloco-card-login {
     background-color: var(--cor-fundo-card);
     padding: 40px;
     border-radius: 10px;
+    border: 1px solid #333333;
     max-width: 400px;
-    margin: 100px auto;
-    text-align: center;
-    display: block !important; /* Forçado a aparecer */
-}
-
-/* ==========================================
-   LAYOUT PC E MOBILE
-   ========================================== */
-.painel-principal { width: 100%; max-width: 1200px; margin: 0 auto; }
-
-/* Barra Inferior Mobile */
-.barra-inferior-mobile {
-    display: none; 
-    position: fixed;
-    bottom: 0;
-    left: 0;
     width: 100%;
-    height: 65px;
-    background-color: #1a1a1a;
-    border-top: 1px solid #333;
-    z-index: 10001;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    margin: 100px auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    text-align: center;
 }
 
-/* Gaveta do Carrinho */
-.coluna-carrinho {
-    position: fixed !important;
-    bottom: 65px;
-    left: 0;
-    right: 0;
-    z-index: 9999;
-    background-color: #212121;
-    border-radius: 20px 20px 0 0;
-    padding: 20px;
-    max-height: 70vh;
-    transition: transform 0.3s ease-out;
-    transform: translateY(110%);
+.login-header {
+    margin-bottom: 30px;
 }
 
-.coluna-carrinho.aberto { transform: translateY(0); }
-
-/* Ajuste Mobile */
-@media (max-width: 850px) {
-    .barra-superior, .titulo-desktop, .abas-navegacao { display: none !important; }
-    .barra-inferior-mobile { display: flex !important; }
-    body { padding-bottom: 80px !important; }
+.login-header p {
+    font-size: 13px;
+    color: #888888;
+    margin-top: 10px;
 }
 
-/* ==========================================
-   CARROSSEL E SELECT
-   ========================================== */
-.carrossel { position: relative; width: 100%; height: 200px; background: #000; overflow: hidden; }
-.carrossel img { width: 100%; height: 100%; object-fit: cover; display: none; }
-.carrossel img.ativa { display: block; }
-
-.btn-carrossel {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(0,0,0,0.5); color: var(--cor-principal);
-    border: none; padding: 10px; cursor: pointer; z-index: 2;
+.bloco-card-login input {
+    width: 100%;
+    padding: 12px;
+    background-color: #1A1A1A;
+    border: 1px solid #444444;
+    border-radius: 6px;
+    color: white;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
 }
-.btn-prev { left: 10px; }
-.btn-next { right: 10px; }
 
-select {
-    appearance: none; background: #111 !important; border: 1px solid #444; color: white;
-    padding: 10px; border-radius: 5px; width: 100%; cursor: pointer;
+.bloco-card-login input:focus {
+    border-color: var(--cor-principal);
 }
