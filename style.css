@@ -648,3 +648,43 @@ body {
 .bloco-card-login input:focus {
     border-color: var(--cor-principal);
 }
+
+/* --- BARRA INFERIOR FIXA (ESTILO APP NATIVO) --- */
+.barra-inferior-mobile {
+    display: none; /* Escondido por padrão para não quebrar no Desktop */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    background-color: #262626; /* Cor do fundo card */
+    border-top: 1px solid #333333;
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom); /* Ajuste para iPhones com Notch */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* Oculta apenas em telas grandes (Desktop) */
+@media (min-width: 851px) {
+    .barra-inferior-mobile { display: none !important; }
+}
+
+/* Ativa em telas mobile */
+@media (max-width: 850px) {
+    .barra-inferior-mobile { display: flex !important; }
+    body { padding-bottom: 70px !important; } /* Espaço para a barra não cobrir conteúdo */
+}
+
+.item-nav-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #888888;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.item-nav-mobile.ativa { color: var(--cor-principal); }
