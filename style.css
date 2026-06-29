@@ -405,3 +405,42 @@ body {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Estilização da Tela de Login */
+.bloco-card-login {
+    background-color: var(--cor-fundo-card);
+    padding: 40px;
+    border-radius: 10px;
+    border: 1px solid #333333;
+    max-width: 400px;
+    width: 100%;
+    margin: 100px auto Helvetica, sans-serif;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+.login-header {
+    margin-bottom: 30px;
+}
+
+.login-header p {
+    font-size: 13px;
+    color: #888888;
+    margin-top: 10px;
+}
+
+.bloco-card-login input {
+    width: 100%;
+    padding: 12px;
+    background-color: #1A1A1A;
+    border: 1px solid #444444;
+    border-radius: 6px;
+    color: white;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.bloco-card-login input:focus {
+    border-color: var(--cor-principal);
+}
