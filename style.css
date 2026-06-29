@@ -1,8 +1,41 @@
 /* ==========================================
-   AJUSTES CRÍTICOS PARA A BARRA INFERIOR (MOBILE)
+   CONFIGURAÇÃO DE CORES E BASE (JERI 20)
    ========================================== */
+:root {
+    --cor-principal: #F4C414;
+    --cor-fundo-escuro: #1A1A1A;
+    --cor-fundo-card: #262626;
+    --cor-texto-claro: #FFFFFF;
+    --cor-texto-escuro: #111111;
+    --cor-erro: #FF4D4D;
+    --cor-sucesso: #2ECC71;
+}
 
-/* Garante que a barra inferior sempre fique por cima de tudo */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+
+body { background-color: var(--cor-fundo-escuro); color: var(--cor-texto-claro); min-height: 100vh; }
+
+.escondido { display: none !important; }
+
+/* ==========================================
+   LOGIN (Corrigido para sempre aparecer)
+   ========================================== */
+.bloco-card-login {
+    background-color: var(--cor-fundo-card);
+    padding: 40px;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: 100px auto;
+    text-align: center;
+    display: block !important; /* Forçado a aparecer */
+}
+
+/* ==========================================
+   LAYOUT PC E MOBILE
+   ========================================== */
+.painel-principal { width: 100%; max-width: 1200px; margin: 0 auto; }
+
+/* Barra Inferior Mobile */
 .barra-inferior-mobile {
     display: none; 
     position: fixed;
@@ -11,17 +44,17 @@
     width: 100%;
     height: 65px;
     background-color: #1a1a1a;
-    border-top: 1px solid #333333;
+    border-top: 1px solid #333;
+    z-index: 10001;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    z-index: 10001; /* Z-index mais alto que o da gaveta */
 }
 
-/* Corrigindo o comportamento da Gaveta para subir "atrás" da barra inferior */
+/* Gaveta do Carrinho */
 .coluna-carrinho {
     position: fixed !important;
-    bottom: 65px; /* Sobe a gaveta para começar exatamente acima da barra */
+    bottom: 65px;
     left: 0;
     right: 0;
     z-index: 9999;
@@ -30,76 +63,34 @@
     padding: 20px;
     max-height: 70vh;
     transition: transform 0.3s ease-out;
-    transform: translateY(110%); /* Escondido fora da tela */
+    transform: translateY(110%);
 }
 
-.coluna-carrinho.aberto {
-    transform: translateY(0);
-}
+.coluna-carrinho.aberto { transform: translateY(0); }
 
-/* Garante que o conteúdo não fique escondido sob a barra */
+/* Ajuste Mobile */
 @media (max-width: 850px) {
-    body {
-        padding-bottom: 80px !important;
-    }
+    .barra-superior, .titulo-desktop, .abas-navegacao { display: none !important; }
+    .barra-inferior-mobile { display: flex !important; }
+    body { padding-bottom: 80px !important; }
 }
 
 /* ==========================================
-   ESTILIZAÇÃO DO CARROSSEL (AS SETINHAS)
+   CARROSSEL E SELECT
    ========================================== */
-.carrossel {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    background-color: #000;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-}
+.carrossel { position: relative; width: 100%; height: 200px; background: #000; overflow: hidden; }
+.carrossel img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.carrossel img.ativa { display: block; }
 
-.carrossel img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: none;
-}
-
-.carrossel img.ativa {
-    display: block;
-}
-
-/* Estilo das setinhas restaurado */
 .btn-carrossel {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.5);
-    color: var(--cor-principal);
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 50%;
-    z-index: 2;
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.5); color: var(--cor-principal);
+    border: none; padding: 10px; cursor: pointer; z-index: 2;
 }
-
 .btn-prev { left: 10px; }
 .btn-next { right: 10px; }
 
-/* ==========================================
-   CORREÇÃO DA SELEÇÃO DE CORES (SELECT)
-   ========================================== */
 select {
-    appearance: none; /* Remove o visual nativo feio */
-    background: #111 !important;
-    border: 1px solid #444;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    width: 100%;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23F4C414%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px top 50%;
-    background-size: 12px auto;
+    appearance: none; background: #111 !important; border: 1px solid #444; color: white;
+    padding: 10px; border-radius: 5px; width: 100%; cursor: pointer;
 }
