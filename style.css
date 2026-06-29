@@ -34,7 +34,7 @@ body {
 }
 
 /* ==========================================
-   PAINEL PRINCIPAL E ESTRUTURA (GRID)
+   PAINEL PRINCIPAL E ESTRUTURA DE COLUNAS
    ========================================== */
 #painel-principal {
     width: 100%;
@@ -95,27 +95,17 @@ body {
     transition: all 0.3s ease;
 }
 
-.btn-aba:hover {
-    color: var(--cor-texto-claro);
-}
-
 .btn-aba.ativa {
     color: var(--cor-principal);
     border-bottom-color: var(--cor-principal);
 }
 
-/* Área de Conteúdo Principal (Split em 2 Colunas) */
+/* Área de Conteúdo Principal (Split em 2 Colunas para PC) */
 .conteudo-principal {
     display: grid;
     grid-template-columns: 1fr 350px;
     gap: 25px;
     align-items: start;
-}
-
-@media (max-width: 900px) {
-    .conteudo-principal {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* Estilização Geral dos Blocos (Cards) */
@@ -134,20 +124,6 @@ body {
     color: var(--cor-texto-claro);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-}
-
-/* Aba Início e Caixa de Mensagem */
-.titulo-boas-vindas {
-    color: var(--cor-principal) !important;
-}
-
-.caixa-mensagem-boas-vindas {
-    background-color: #1A1A1A;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px dashed #444444;
-    font-style: italic;
-    color: #DDDDDD;
 }
 
 /* ==========================================
@@ -183,23 +159,11 @@ body {
     border-color: var(--cor-principal);
 }
 
-/* CORREÇÃO: Grid travada para renderizar exatamente 3 produtos lado a lado */
+/* Grid Travado para renderizar exatamente 3 produtos lado a lado no PC */
 .grid-produtos {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-}
-
-/* Responsividade para telas menores (muda para 1 coluna se faltar espaço) */
-@media (max-width: 1100px) {
-    .grid-produtos {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-@media (max-width: 600px) {
-    .grid-produtos {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* Cartão do Produto Individual */
@@ -213,7 +177,7 @@ body {
     border: 1px solid #333333;
     transition: transform 0.2s ease, border-color 0.2s ease;
     padding: 12px;
-    height: 100%; /* Mantém os cartões da mesma linha alinhados com a mesma altura */
+    height: 100%; /* Mantém o alinhamento de altura idêntico nos cards da mesma linha */
 }
 
 .cartao-produto:hover {
@@ -221,21 +185,21 @@ body {
     border-color: var(--cor-principal);
 }
 
-/* CORREÇÃO: Carrossel com tamanho máximo fixado para impedir imagens gigantes */
+/* Moldura do Carrossel com tamanho máximo controlado */
 .carrossel {
     position: relative;
     width: 100%;
-    height: 240px; /* Limita a altura máxima da imagem de forma fixa */
+    height: 220px; /* Mantém uma altura uniforme e profissional */
     background-color: #111111;
     border-radius: 6px;
     overflow: hidden;
 }
 
-/* CORREÇÃO: Imagens simétricas e sem distorção */
+/* Tratamento da Imagem para nunca quebrar ou distorcer */
 .carrossel img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Recorta e preenche a moldura preservando a proporção */
+    object-fit: cover; /* Faz o preenchimento proporcional sem esticar a imagem */
     display: none;
 }
 
@@ -276,7 +240,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    flex-grow: 1; /* Empurra os botões para a base do card */
+    flex-grow: 1; /* Garante que as informações preencham igualmente e alinhem o botão abaixo */
 }
 
 .info-produto h3 {
@@ -285,7 +249,7 @@ body {
     color: var(--cor-texto-claro);
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Se o nome do modelo for muito grande, coloca '...' em vez de quebrar */
+    text-overflow: ellipsis; /* Evita quebra de linha em nomes gigantes botando '...' */
 }
 
 .estoque-status {
@@ -316,7 +280,7 @@ body {
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: auto; /* Garante alinhamento perfeito na base */
+    margin-top: auto; /* Alinhamento milimétrico na parte inferior do card */
 }
 
 .btn-adicionar:hover {
@@ -418,7 +382,71 @@ body {
     cursor: not-allowed;
 }
 
-/* Animação Suave */
+/* ==========================================
+   OTIMIZAÇÃO MOBILE COMPLETA (ANDROID E IOS)
+   ========================================== */
+
+/* Notebooks pequenos ou telas intermediárias */
+@media (max-width: 1100px) {
+    .grid-produtos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+}
+
+/* Smartphones e dispositivos móveis (Alvo principal do sistema) */
+@media (max-width: 850px) {
+    body {
+        padding: 10px; /* Mais espaço útil nas laterais das telas mobile */
+    }
+
+    .barra-superior {
+        flex-direction: column; /* Empilha logo e nome do operador para não espremer */
+        gap: 10px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .conteudo-principal {
+        grid-template-columns: 1fr; /* Força o Carrinho a deslizar elegantemente para baixo do Catálogo */
+        gap: 20px;
+    }
+
+    /* Layout do catálogo em celulares: 2 por linha aproveitando excelente visibilidade vertical */
+    .grid-produtos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    /* Altura balanceada para miniaturas em telas móveis */
+    .carrossel {
+        height: 170px;
+    }
+
+    .cartao-produto {
+        padding: 10px;
+    }
+
+    .info-produto {
+        gap: 6px;
+    }
+
+    .info-produto h3 {
+        font-size: 13px; /* Legibilidade perfeita para telas menores */
+    }
+}
+
+/* Celulares muito compactos em modo retrato */
+@media (max-width: 440px) {
+    .grid-produtos {
+        grid-template-columns: 1fr; /* Muda para 1 por linha se o display for extremamente estreito */
+    }
+    .carrossel {
+        height: 230px; /* Amplia a miniatura no card único horizontal */
+    }
+}
+
+/* Animações */
 @keyframes surgimentoSuave {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
