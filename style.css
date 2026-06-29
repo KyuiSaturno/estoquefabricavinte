@@ -177,7 +177,7 @@ body {
     border: 1px solid #333333;
     transition: transform 0.2s ease, border-color 0.2s ease;
     padding: 12px;
-    height: 100%; /* Mantém o alinhamento de altura idêntico nos cards da mesma linha */
+    height: 100%;
 }
 
 .cartao-produto:hover {
@@ -189,7 +189,7 @@ body {
 .carrossel {
     position: relative;
     width: 100%;
-    height: 220px; /* Mantém uma altura uniforme e profissional */
+    height: 220px;
     background-color: #111111;
     border-radius: 6px;
     overflow: hidden;
@@ -199,7 +199,7 @@ body {
 .carrossel img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Faz o preenchimento proporcional sem esticar a imagem */
+    object-fit: cover;
     display: none;
 }
 
@@ -210,9 +210,9 @@ body {
 /* Botões do Carrossel Ajustados para a Base */
 .btn-carrossel {
     position: absolute;
-    top: auto;                 /* Remove centralização vertical antiga */
-    bottom: 12px;              /* Alinha os botões flutuando na base */
-    transform: none;           /* Remove reset de posicionamento */
+    top: auto;
+    bottom: 12px;
+    transform: none;
     background-color: rgba(0, 0, 0, 0.65);
     color: var(--cor-principal);
     border: none;
@@ -250,7 +250,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    flex-grow: 1; /* Garante que as informações preencham igualmente e alinhem o botão abaixo */
+    flex-grow: 1;
 }
 
 .info-produto h3 {
@@ -259,7 +259,7 @@ body {
     color: var(--cor-texto-claro);
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Evita quebra de linha em nomes gigantes botando '...' */
+    text-overflow: ellipsis;
 }
 
 .estoque-status {
@@ -290,7 +290,7 @@ body {
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: auto; /* Alinhamento milimétrico na parte inferior do card */
+    margin-top: auto;
 }
 
 .btn-adicionar:hover {
@@ -366,6 +366,40 @@ body {
     color: var(--cor-texto-escuro);
 }
 
+/* Campo de input rápido ao clicar duas vezes na quantidade */
+.input-qtd-rapido {
+    width: 60px;
+    padding: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    background-color: #111111;
+    color: #FFFFFF;
+    border: 2px solid var(--cor-principal);
+    border-radius: 4px;
+    outline: none;
+}
+
+/* Botão de abrir/fechar gaveta (Escondido por padrão no PC) */
+.btn-toggle-gaveta {
+    display: none;
+    width: 100%;
+    background-color: #111111;
+    color: #FFFFFF;
+    border: none;
+    padding: 14px;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom: 1px solid #333333;
+}
+
 /* Botão Confirmar Transmissão */
 .btn-confirmar-baixa {
     width: 100%;
@@ -393,7 +427,7 @@ body {
 }
 
 /* ==========================================
-   OTIMIZAÇÃO MOBILE COMPLETA (ANDROID E IOS)
+   OTIMIZAÇÃO MOBILE COMPLETA (GAVETA E REDIMENSIONAMENTO)
    ========================================== */
 
 /* Notebooks pequenos ou telas intermediárias */
@@ -407,19 +441,65 @@ body {
 /* Smartphones e dispositivos móveis (Alvo principal do sistema) */
 @media (max-width: 850px) {
     body {
-        padding: 10px; /* Mais espaço útil nas laterais das telas mobile */
+        padding: 10px 10px 80px 10px; /* Margem inferior extra para não cobrir o catálogo */
     }
 
     .barra-superior {
-        flex-direction: column; /* Empilha logo e nome do operador para não espremer */
+        flex-direction: column;
         gap: 10px;
         padding: 15px;
         text-align: center;
     }
 
     .conteudo-principal {
-        grid-template-columns: 1fr; /* Força o Carrinho a deslizar elegantemente para baixo do Catálogo */
+        grid-template-columns: 1fr;
         gap: 20px;
+    }
+
+    /* Transformação da seção do Carrinho em uma Gaveta Fixa Inferior */
+    .coluna-carrinho {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        margin: 0;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
+        background-color: var(--cor-fundo-card);
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        padding: 0 20px 20px 20px;
+        transition: transform 0.3s ease-in-out;
+        transform: translateY(calc(100% - 49px)); /* Exibe unicamente a barra de topo do gatilho */
+    }
+
+    /* Injetada dinamicamente via JS ao expandir */
+    .coluna-carrinho.aberto {
+        transform: translateY(0);
+    }
+
+    /* Ativação do botão interativo no Mobile */
+    .btn-toggle-gaveta {
+        display: flex;
+    }
+
+    /* Oculta o título fixo H2 original apenas no Celular para usar o botão */
+    .coluna-carrinho > h2 {
+        display: none;
+    }
+
+    /* Controle de rolagem para os itens selecionados não estourarem o topo da gaveta */
+    #itens-carrinho {
+        overflow-y: auto;
+        flex: 1;
+        max-height: 240px;
+        margin-bottom: 12px;
+    }
+
+    .divisor {
+        margin: 10px 0;
     }
 
     /* Layout do catálogo em celulares: 2 por linha aproveitando excelente visibilidade vertical */
@@ -428,7 +508,6 @@ body {
         gap: 12px;
     }
 
-    /* Altura balanceada para miniaturas em telas móveis */
     .carrossel {
         height: 170px;
     }
@@ -442,17 +521,17 @@ body {
     }
 
     .info-produto h3 {
-        font-size: 13px; /* Legibilidade perfeita para telas menores */
+        font-size: 13px;
     }
 }
 
 /* Celulares muito compactos em modo retrato */
 @media (max-width: 440px) {
     .grid-produtos {
-        grid-template-columns: 1fr; /* Muda para 1 por linha se o display for extremamente estreito */
+        grid-template-columns: 1fr;
     }
     .carrossel {
-        height: 230px; /* Amplia a miniatura no card único horizontal */
+        height: 230px;
     }
 }
 
