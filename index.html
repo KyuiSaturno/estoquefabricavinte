@@ -67,10 +67,16 @@
                 </div>
             </div>
 
-            <section class="coluna-carrinho bloco-card">
+            <section id="carrinho-gaveta" class="coluna-carrinho bloco-card">
+                
+                <button type="button" class="btn-toggle-gaveta" onclick="toggleCarrinhoMobile()">
+                    <span id="label-gaveta-status">Carrinho Vazio 🛒</span>
+                    <span id="badge-contador-carrinho" style="background: var(--cor-erro); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold;">0</span>
+                </button>
+
                 <h2>Transmissão de Saída</h2>
                 
-                <div class="seletor-grupo">
+                <div class="seletor-grupo" style="margin-top: 10px;">
                     <label for="localizacao">Destino da Mercadoria:</label>
                     <select id="localizacao">
                         <option value="Loja Física Jeri">Loja Física Jeri</option>
