@@ -146,7 +146,8 @@ async function filtrarPorCategoria() {
 
         if (resultado.sucesso) {
             dadosProdutosFiltrados = resultado.produtos;
-            renderizarProdutos(dadosProdutosFiltrados, "lista-produtos-filtrados", "produtos");
+            // Executa o filtro visual baseado no estado atual da caixinha promocional
+            aplicarFiltroVisual();
         } else {
             containerFiltrados.innerHTML = `<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro ao buscar categoria: ${resultado.erro}</p>`;
         }
@@ -156,12 +157,29 @@ async function filtrarPorCategoria() {
     }
 }
 
-function renderizarProdutos(listaProdutos, containerId, prefixoContexto) {
+// Executa a filtragem local sem precisar reconsultar o servidor
+function aplicarFiltroVisual() {
+    const filtroPromoCheckbox = document.getElementById("filtro-promocional");
+    const apenasPromocionais = filtroPromoCheckbox ? filtroPromoCheckbox.checked : false;
+    
+    if (apenasPromocionais) {
+        // Mantém apenas os modelos que contêm variação com estoque promocional maior que 0
+        const produtosPromocionais = dadosProdutosFiltrados.filter(produto => {
+            if (!produto.estoquePromocional) return false;
+            return Object.values(produto.estoquePromocional).some(qtd => qtd > 0);
+        });
+        renderizarProdutos(produtosPromocionais, "lista-produtos-filtrados", "produtos", true);
+    } else {
+        renderizarProdutos(dadosProdutosFiltrados, "lista-produtos-filtrados", "produtos", false);
+    }
+}
+
+function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEstoquePromo = false) {
     const listaDiv = document.getElementById(containerId);
     listaDiv.innerHTML = "";
 
     if (listaProdutos.length === 0) {
-        listaDiv.innerHTML = "<p class='carrinho-vazio'>Nenhum modelo cadastrado nesta aba da planilha.</p>";
+        listaDiv.innerHTML = "<p class='carrinho-vazio'>Nenhum modelo cadastrado ou disponível para os filtros selecionados.</p>";
         return;
     }
 
@@ -172,9 +190,18 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto) {
             indicesImagens[idUnicoControle] = 0;
         }
 
-        const coresDisponiveis = Object.keys(produto.estoquePorCor);
+        // Determina qual mapa de estoque ler
+        const mapaEstoqueAlvo = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
+        if (!mapaEstoqueAlvo) return;
+
+        const coresTotais = Object.keys(mapaEstoqueAlvo);
+        // Se estiver no modo promo, filtra no select para exibir apenas as cores que têm estoque promocional de fato
+        const coresDisponiveis = usarEstoquePromo ? coresTotais.filter(cor => (mapaEstoqueAlvo[cor] || 0) > 0) : coresTotais;
+        
+        if (coresDisponiveis.length === 0) return;
+
         const primeiraCor = coresDisponiveis[0] || "Padrão";
-        const estoqueInicial = produto.estoquePorCor[primeiraCor] || 0;
+        const estoqueInicial = mapaEstoqueAlvo[primeiraCor] || 0;
 
         let imagensHTML = "";
         if (produto.imagens && produto.imagens.length > 0) {
@@ -198,10 +225,14 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto) {
             coresOpcoes += `<option value="${cor}">${cor}</option>`;
         });
 
+        // Adiciona um selo visual discreto de "PROMO" no topo do carrossel se a caixinha estiver ativa
+        const tagPromoHTML = usarEstoquePromo ? `<div style="position: absolute; top: 10px; left: 10px; background-color: var(--cor-erro); color: white; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">Promoção</div>` : '';
+
         const cartao = document.createElement("div");
         cartao.className = "cartao-produto";
         cartao.innerHTML = `
             <div class="carrossel" id="carrossel-${idUnicoControle}">
+                ${tagPromoHTML}
                 ${imagensHTML}
                 ${botoesCarrossel}
             </div>
@@ -209,15 +240,15 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto) {
                 <h3>${produto.nome}</h3>
                 <div class="seletor-grupo">
                     <label>Selecione a Cor / Tamanho:</label>
-                    <select id="cor-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}')">
+                    <select id="cor-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
                         ${coresOpcoes}
                     </select>
                 </div>
                 <p class="estoque-status ${estoqueInicial === 0 ? 'sem-estoque' : ''}" id="status-${idUnicoControle}">
-                    Estoque disponível: <span>${estoqueInicial}</span> un.
+                    ${usarEstoquePromo ? 'Estoque Promo: ' : 'Estoque disponível: '}<span>${estoqueInicial}</span> un.
                 </p>
             </div>
-            <button class="btn-adicionar" id="btn-add-${idUnicoControle}" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}')" ${estoqueInicial === 0 ? 'disabled' : ''}>
+            <button class="btn-adicionar" id="btn-add-${idUnicoControle}" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})" ${estoqueInicial === 0 ? 'disabled' : ''}>
                 ${estoqueInicial === 0 ? 'Esgotado' : 'Selecionar Peça'}
             </button>
         `;
@@ -241,13 +272,14 @@ function mudarFoto(idUnicoControle, totalFotos, direcao) {
     imagens[indexAtual].classList.add("ativa");
 }
 
-function atualizarStatusEstoque(produtoId, prefixoContexto) {
+function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
     const produto = dadosProdutosFiltrados.find(p => p.id === produtoId);
     if (!produto) return;
     
     const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
-    const qtdDisponivel = produto.estoquePorCor[corSelecionada] || 0;
+    const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
+    const qtdDisponivel = mapaEstoque[corSelecionada] || 0;
 
     const statusP = document.getElementById(`status-${idUnicoControle}`);
     const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
@@ -283,14 +315,16 @@ function atualizarStatusEstoque(produtoId, prefixoContexto) {
 // ==========================================
 // REGRAS DO CARRINHO DE TRANSMISSÃO
 // ==========================================
-function adicionarAoCarrinho(produtoId, prefixoContexto) {
+function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
     const produto = dadosProdutosFiltrados.find(p => p.id === produtoId);
     
     const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
-    const estoqueMaximo = produto.estoquePorCor[corSelecionada] || 0;
+    const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
+    const estoqueMaximo = mapaEstoque[corSelecionada] || 0;
 
-    const itemExistente = carrinho.find(item => item.id === produtoId && item.corSelecionada === corSelecionada);
+    // Diferencia itens normais de itens promocionais dentro do array do carrinho
+    const itemExistente = carrinho.find(item => item.id === produtoId && item.corSelecionada === corSelecionada && item.promocional === usarEstoquePromo);
 
     if (itemExistente) {
         if (itemExistente.quantidade < estoqueMaximo) {
@@ -302,10 +336,11 @@ function adicionarAoCarrinho(produtoId, prefixoContexto) {
     } else {
         carrinho.push({
             id: produtoId,
-            nome: produto.nome,
+            nome: produto.nome + (usarEstoquePromo ? " (PROMO)" : ""),
             corSelecionada: corSelecionada,
             quantidade: 1,
             maximo: estoqueMaximo,
+            promocional: usarEstoquePromo,
             categoriaOrigem: document.getElementById("filtro-categoria").value
         });
     }
@@ -376,6 +411,7 @@ async function confirmarBaixa() {
                 tipo: item.categoriaOrigem,
                 usuario: usuarioLogado,
                 localizacao: localizacao,
+                isPromo: item.promocional, // Passa o estado booleano para a nova regra da API do codigo.gs
                 carrinho: [item]
             }));
 
