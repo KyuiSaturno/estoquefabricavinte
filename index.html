@@ -3,132 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Jeri 20 - Estoque</title>
-    <link rel="icon" type="image/png" href="favicon.png">
+    <title>SGV - Jeri 20</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="nav-mobile-sistema" class="bottom-nav escondido">
-        <button class="bottom-nav-item ativa" id="btn-nav-produtos" onclick="alternarAbaSistemas('produtos')">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-            </svg>
-            <span>Catálogo</span>
-        </button>
-        
-        <button class="bottom-nav-item" id="btn-nav-carrinho" onclick="alternarAbaSistemas('carrinho')" style="position: relative;">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-            <span>Carrinho</span>
-            <span id="badge-contador" class="badge-contador">0</span>
-        </button>
-        
-        <button class="bottom-nav-item" style="color: var(--cor-erro, #ff4d4d);" onclick="fazerLogout()">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-            </svg>
-            <span>Sair</span>
-        </button>
-    </div>
-
-    <div id="tela-login" class="bloco-card-login">
-        <div class="login-header">
-            <span class="logo-texto">JERI 20</span>
-            <p>Insira suas credenciais para acessar o estoque</p>
-        </div>
-        
-        <div class="seletor-grupo">
-            <label for="usuario">Usuário:</label>
-            <input type="text" id="usuario" placeholder="Digite seu usuário">
-        </div>
-
-        <div class="seletor-grupo">
-            <label for="senha">Senha:</label>
-            <input type="password" id="senha" placeholder="Digite sua senha">
-        </div>
-
-        <p id="erro-login" style="color: var(--cor-erro); font-size: 14px; margin-bottom: 15px; font-weight: 600;"></p>
-
-        <button id="btn-login" class="btn-confirmar-baixa" onclick="fazerLogin()">Entrar</button>
-    </div>
-
-    <div id="painel-principal" class="escondido">
+    <div id="painel-principal">
         
         <header class="barra-superior">
-            <div class="logo-area">
-                <span class="logo-texto">JERI 20</span>
-            </div>
+            <div class="logo-texto">JERI 20</div>
+            
             <div class="usuario-status-container">
                 <span id="nome-operador">Usuário: Carregando...</span>
                 
-                <button id="btn-carrinho-topo" class="btn-carrinho-topo-pc" onclick="alternarSidebarCarrinho(true)">
-                    🛒 Carrinho <span id="badge-contador-topo" class="badge-contador-topo">0</span>
+                <button id="btn-carrinho-topo" class="btn-carrinho-topo-pc">
+                    🛒 Carrinho
+                    <span id="contador-topo" class="badge-contador-topo">0</span>
                 </button>
                 
-                <button id="btn-sair-topo" class="btn-sair-desktop" onclick="fazerLogout()">Sair</button>
+                <button id="btn-sair" class="btn-sair-desktop">Sair</button>
             </div>
         </header>
 
         <main class="conteudo-principal">
             
-            <div id="aba-produtos" class="bloco-card">
+            <section id="aba-produtos" class="bloco-card exibir-mobile">
                 <h2>Explorar Catálogo por Categoria</h2>
+                
                 <div class="seletor-grupo-filtro">
                     <label for="filtro-categoria">Selecionar Categoria:</label>
-                    <select id="filtro-categoria" onchange="filtrarPorCategoria()">
-                        <option value="">-- Escolha uma Categoria --</option>
-                    </select>
+                    <select id="filtro-categoria">
+                        </select>
                 </div>
 
-                <div style="margin: -5px 0 20px 0; display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="filtro-promocional" onchange="aplicarFiltroVisual()" style="width: 18px; height: 18px; cursor: pointer;">
-                    <label for="filtro-promocional" style="font-size: 14px; font-weight: bold; color: var(--cor-principal); cursor: pointer; user-select: none; display: flex; align-items: center; gap: 4px;">
+                <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="filtro-promocional" style="width: auto;">
+                    <label for="filtro-promocional" style="margin: 0; color: var(--cor-principal); font-weight: bold; cursor: pointer;">
                         Promocional 🏷️
                     </label>
                 </div>
-                
-                <div id="lista-produtos-filtrados" class="grid-produtos">
-                    <p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>
-                </div>
-            </div>
 
-            <aside id="aba-carrinho" class="sidebar-gaveta-carrinho">
-                <div class="sidebar-carrinho-header">
-                    <h2>Carrinho</h2>
-                    <button class="btn-fechar-sidebar" onclick="alternarSidebarCarrinho(false)">&times;</button>
-                </div>
-                
-                <div class="sidebar-carrinho-corpo">
-                    <div class="seletor-grupo">
-                        <label for="localizacao">Destino da Mercadoria:</label>
-                        <select id="localizacao">
-                            <option value="Loja Física Jeri">Loja Física Jeri</option>
-                            <option value="Loja Física Jijoca">Loja Física Jijoca</option>
-                            <option value="Envio de Pedido">Envio de Pedido</option>
-                        </select>
+                <div id="grid-produtos" class="grid-produtos">
                     </div>
+            </section>
 
-                    <div class="divisor"></div>
-
-                    <h3>Itens Selecionados</h3>
-                    <div id="itens-carrinho" class="sidebar-scroll-itens">
-                        <p class="carrinho-vazio">Nenhum item selecionado.</p>
-                    </div>
-                </div>
-
-                <div class="sidebar-carrinho-footer">
-                    <button id="btn-confirmar" class="btn-confirmar-baixa" onclick="confirmarBaixa()" disabled>
-                        Confirmar
-                    </button>
-                </div>
-            </aside>
-
-            <div id="overlay-carrinho" class="overlay-escuro" onclick="alternarSidebarCarrinho(false)"></div>
-            
         </main>
     </div>
+
+    <div id="aba-carrinho" class="sidebar-gaveta-carrinho">
+        <div class="sidebar-carrinho-header">
+            <h2>Carrinho</h2>
+            <button id="btn-fechar-carrinho" class="btn-fechar-sidebar">&times;</button>
+        </div>
+        
+        <div class="sidebar-carrinho-corpo">
+            <h3>Destino da Mercadoria:</h3>
+            <div class="seletor-grupo" style="margin-bottom: 20px;">
+                <select id="select-destino">
+                    </select>
+            </div>
+
+            <h3>Itens Selecionados</h3>
+            <div id="itens-carrinho">
+                <p class="carrinho-vazio">Nenhum item selecionado.</p>
+            </div>
+        </div>
+
+        <div class="sidebar-carrinho-footer">
+            <button id="btn-confirmar" class="btn-confirmar-baixa" disabled>Confirmar</button>
+        </div>
+    </div>
+
+    <div id="overlay-carrinho" class="overlay-escuro"></div>
+
+    <nav class="bottom-nav">
+        <button class="bottom-nav-item ativa" id="btn-nav-produtos">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6-6h4V4h-4v4zm6-4v4h4V4h-4zm-6 6h4v-4h-4v4zm6 0h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+            Catálogo
+        </button>
+        <button class="bottom-nav-item" id="btn-nav-carrinho">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            Carrinho
+            <span id="contador-Abas" class="badge-contador">0</span>
+        </button>
+    </nav>
 
     <script src="script.js"></script>
 </body>
