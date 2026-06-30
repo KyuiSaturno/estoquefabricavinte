@@ -11,19 +11,9 @@ let indicesImagens = {};
 // EXECUTA ASSIM QUE A PÁGINA CARREGA
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. GARANTE O ESTADO INICIAL SEGURO AO REINICIAR (F5)
+    // Garante que o carrinho comece fechado no carregamento original
     alternarSidebarCarrinho(false);
-    
-    const painelPrincipal = document.getElementById("painel-principal");
-    const telaLogin = document.getElementById("tela-login");
-    const navMobile = document.getElementById("nav-mobile-sistema");
 
-    // Força o painel a sumir e a tela de login a aparecer até que o login seja refeito
-    if (painelPrincipal) painelPrincipal.classList.add("escondido");
-    if (navMobile) navMobile.classList.add("escondido");
-    if (telaLogin) telaLogin.classList.remove("escondido");
-
-    // 2. OUVINTES DE EVENTOS (LISTENERS)
     // Ouvinte para o botão de Entrar na tela de login
     const btnLoginSubmit = document.getElementById("btn-login");
     if (btnLoginSubmit) {
