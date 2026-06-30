@@ -7,10 +7,28 @@ let dadosProdutosFiltrados = [];
 let carrinho = [];      
 let indicesImagens = {}; 
 
+// ==========================================
 // EXECUTA ASSIM QUE A PÁGINA CARREGA
+// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-    // Garante que o carrinho comece fechado no carregamento
+    // 1. GARANTE O ESTADO INICIAL SEGURO AO REINICIAR (F5)
     alternarSidebarCarrinho(false);
+    
+    const painelPrincipal = document.getElementById("painel-principal");
+    const telaLogin = document.getElementById("tela-login");
+    const navMobile = document.getElementById("nav-mobile-sistema");
+
+    // Força o painel a sumir e a tela de login a aparecer até que o login seja refeito
+    if (painelPrincipal) painelPrincipal.classList.add("escondido");
+    if (navMobile) navMobile.classList.add("escondido");
+    if (telaLogin) telaLogin.classList.remove("escondido");
+
+    // 2. OUVINTES DE EVENTOS (LISTENERS)
+    // Ouvinte para o botão de Entrar na tela de login
+    const btnLoginSubmit = document.getElementById("btn-login");
+    if (btnLoginSubmit) {
+        btnLoginSubmit.addEventListener("click", fazerLogin);
+    }
 
     // Ouvintes de clique para abrir/fechar a Sidebar no PC
     const btnCarrinhoTopo = document.getElementById("btn-carrinho-topo");
@@ -149,11 +167,15 @@ function fazerLogout() {
     if (usuarioField) usuarioField.value = "";
     if (senhaField) senhaField.value = "";
     
-    document.getElementById("filtro-categoria").innerHTML = '<option value="">-- Escolha uma Categoria --</option>';
-    document.getElementById("grid-produtos").innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
+    const filtroCat = document.getElementById("filtro-categoria");
+    if (filtroCat) filtroCat.innerHTML = '<option value="">-- Escolha uma Categoria --</option>';
+    
+    const gridProd = document.getElementById("grid-produtos");
+    if (gridProd) gridProd.innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
     
     // Reseta visibilidade das telas
-    document.getElementById("painel-principal").classList.add("escondido");
+    const painelPrincipal = document.getElementById("painel-principal");
+    if (painelPrincipal) painelPrincipal.classList.add("escondido");
     
     const navMobile = document.getElementById("nav-mobile-sistema");
     if (navMobile) navMobile.classList.add("escondido");
@@ -207,10 +229,14 @@ async function fazerLogin() {
 
         if (resultado.sucesso) {
             usuarioLogado = usuarioInput;
-            document.getElementById("nome-operador").innerText = `Usuário: ${usuarioLogado}`;
+            const nomeOperador = document.getElementById("nome-operador");
+            if (nomeOperador) nomeOperador.innerText = `Usuário: ${usuarioLogado}`;
             
-            document.getElementById("tela-login").classList.add("escondido");
-            document.getElementById("painel-principal").classList.remove("escondido");
+            const telaLogin = document.getElementById("tela-login");
+            if (telaLogin) telaLogin.classList.add("escondido");
+
+            const painelPrincipal = document.getElementById("painel-principal");
+            if (painelPrincipal) painelPrincipal.classList.remove("escondido");
             
             const navMobile = document.getElementById("nav-mobile-sistema");
             if (navMobile) {
@@ -283,11 +309,11 @@ async function filtrarPorCategoria() {
     const containerFiltrados = document.getElementById("grid-produtos");
 
     if (!categoriaSelecionada) {
-        containerFiltrados.innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
+        if (containerFiltrados) containerFiltrados.innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
         return;
     }
 
-    containerFiltrados.innerHTML = '<p class="carrinho-vazio">Filtrando categoria no servidor...</p>';
+    if (containerFiltrados) containerFiltrados.innerHTML = '<p class="carrinho-vazio">Filtrando categoria no servidor...</p>';
 
     try {
         const params = new URLSearchParams();
@@ -308,11 +334,11 @@ async function filtrarPorCategoria() {
             dadosProdutosFiltrados = resultado.produtos;
             aplicarFiltroVisual();
         } else {
-            containerFiltrados.innerHTML = `<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro ao buscar categoria: ${resultado.erro}</p>`;
+            if (containerFiltrados) containerFiltrados.innerHTML = `<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro ao buscar categoria: ${resultado.erro}</p>`;
         }
     } catch (erro) {
         console.error("Erro no filtro:", erro);
-        containerFiltrados.innerHTML = '<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro de rede ao buscar categoria.</p>';
+        if (containerFiltrados) containerFiltrados.innerHTML = '<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro de rede ao buscar categoria.</p>';
     }
 }
 
@@ -333,6 +359,7 @@ function aplicarFiltroVisual() {
 
 function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEstoquePromo = false) {
     const listaDiv = document.getElementById(containerId);
+    if (!listaDiv) return;
     listaDiv.innerHTML = "";
 
     if (listaProdutos.length === 0) {
@@ -439,7 +466,8 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
     const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
 
     if (statusP) {
-        statusP.querySelector("span").innerText = qtdDisponivel;
+        const spanEstoque = statusP.querySelector("span");
+        if (spanEstoque) spanEstoque.innerText = qtdDisponivel;
         if (qtdDisponivel === 0) {
             statusP.classList.add("sem-estoque");
         } else {
@@ -482,7 +510,9 @@ function mudarFoto(idUnicoControle, totalFotos, direcao) {
     if (carrosselDiv) {
         const images = carrosselDiv.querySelectorAll("img");
         images.forEach(img => img.classList.remove("ativa"));
-        images[indicesImagens[idUnicoControle]].classList.add("ativa");
+        if (images[indicesImagens[idUnicoControle]]) {
+            images[indicesImagens[idUnicoControle]].classList.add("ativa");
+        }
     }
 }
 
@@ -494,7 +524,10 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
     const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
     if (!produto) return;
     
-    const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
+    const seletorCor = document.getElementById(`cor-${idUnicoControle}`);
+    if (!seletorCor) return;
+    const corSelecionada = seletorCor.value;
+
     const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
     const estoqueMaximo = mapaEstoque[corSelecionada] || 0;
 
@@ -528,12 +561,12 @@ function silverwareDelete(index) {
 
 function alterarQuantidadeCarrinho(index, alteracao) {
     const item = carrinho[index];
+    if (!item) return;
     const novaQtd = item.quantidade + alteracao;
 
     if (novaQtd <= 0) {
         carrinho.splice(index, 1);
     } else if (novaQtd <= item.maximo) {
-        item.indigo = true;
         item.quantidade = novaQtd;
     } else {
         alert("A quantidade excede o estoque real disponível.");
@@ -550,12 +583,8 @@ function atualizarInterfaceCarrinho() {
     const elementoBadgeMb = document.getElementById("contador-Abas");      
     const elementoBadgePc = document.getElementById("contador-topo");  
 
-    if (elementoBadgeMb) {
-        elementoBadgeMb.innerText = totalItens;
-    }
-    if (elementoBadgePc) {
-        elementoBadgePc.innerText = totalItens;
-    }
+    if (elementoBadgeMb) elementoBadgeMb.innerText = totalItens;
+    if (elementoBadgePc) elementoBadgePc.innerText = totalItens;
 
     const htmlVazio = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
 
@@ -599,8 +628,10 @@ async function confirmarBaixa() {
     if (carrinho.length === 0) return;
     if (!confirm(`Confirmar a retirada destes itens para: ${localizacao}?`)) return;
 
-    btnConfirmar.innerText = "Processando...";
-    btnConfirmar.disabled = true;
+    if (btnConfirmar) {
+        btnConfirmar.innerText = "Processando...";
+        btnConfirmar.disabled = true;
+    }
 
     try {
         for (let item of carrinho) {
@@ -632,6 +663,7 @@ async function confirmarBaixa() {
     } catch (erro) {
         console.error("Erro na baixa:", erro);
         alert("Erro crítico ao sincronizar os dados de saída.");
+    } finally {
         if (btnConfirmar) {
             btnConfirmar.innerText = "Confirmar";
             btnConfirmar.disabled = false;
