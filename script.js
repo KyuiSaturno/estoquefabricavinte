@@ -10,14 +10,42 @@ let indicesImagens = {};
 // ==========================================
 // CONTROLADOR DE NAVEGAÇÃO INTERNA
 // ==========================================
-function alternarAba(abaDestino) {
+function alternarAbaSistemas(abaDestino) {
     const abaProdutos = document.getElementById("aba-produtos");
-    const btnProdutos = document.getElementById("btn-aba-produtos");
+    const abaCarrinho = document.getElementById("aba-carrinho");
+    
+    const btnPcProdutos = document.getElementById("btn-aba-produtos");
+    const btnPcCarrinho = document.getElementById("btn-aba-carrinho");
+    
+    const btnMbProdutos = document.getElementById("btn-nav-produtos");
+    const btnMbCarrinho = document.getElementById("btn-nav-carrinho");
 
-    // Mantido para compatibilidade caso o login acione a função, focando sempre no Catálogo
-    if (abaDestino === 'produtos' || abaDestino === 'inicio') {
-        if (abaProdutos) abaProdutos.classList.remove("escondido");
-        if (btnProdutos) btnProdutos.classList.add("ativa");
+    // EXECUÇÃO EM MODO CELULAR (Telas menores que 768px)
+    if (window.innerWidth <= 768) {
+        if (abaDestino === 'produtos') {
+            if (abaProdutos) abaProdutos.classList.add("exibir-mobile");
+            if (abaCarrinho) abaCarrinho.classList.remove("exibir-mobile");
+            
+            if (btnMbProdutos) btnMbProdutos.classList.add("ativa");
+            if (btnMbCarrinho) btnMbCarrinho.classList.remove("ativa");
+        } else if (abaDestino === 'carrinho') {
+            if (abaCarrinho) abaCarrinho.classList.add("exibir-mobile");
+            if (abaProdutos) abaProdutos.classList.remove("exibir-mobile");
+            
+            if (btnMbCarrinho) btnMbCarrinho.classList.add("ativa");
+            if (btnMbProdutos) btnMbProdutos.classList.remove("ativa");
+        }
+    } 
+    // EXECUÇÃO EM MODO DESKTOP / PC
+    else {
+        // Exibe ambos na tela em modo coluna conforme design do seu PC
+        if (abaProdutos) abaProdutos.classList.remove("exibir-mobile");
+        if (abaCarrinho) abaCarrinho.classList.remove("exibir-mobile");
+        
+        if (abaDestino === 'produtos') {
+            if (btnPcProdutos) btnPcProdutos.classList.add("ativa");
+            if (btnPcCarrinho) btnPcCarrinho.classList.remove("ativa");
+        }
     }
 }
 
