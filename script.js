@@ -430,7 +430,8 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
                 imagensHTML += `<img src="${url}" class="${classeAtiva}" data-index="${index}" alt="${produto.nome}">`;
             });
         } else {
-            imagesHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
+            // CORRIGIDO: de imagesHTML para imagensHTML para bater com a variável do topo
+            imagensHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
         }
 
         let botoesCarrossel = "";
@@ -468,8 +469,8 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
                     ${usarEstoquePromo ? 'Estoque Promo: ' : 'Estoque disponível: '}<span>${estoqueInicial}</span> un.
                 </p>
             </div>
-            <button class="btn-adicionar" id="btn-add-${idUnicoControle}" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})" ${estoqueInicial === 0 ? 'disabled' : ''}>
-                ${estoqueInicial === 0 ? 'Esgotado' : 'Selecionar Peça'}
+            <button class="btn-adicionar" id="btn-add-${idUnicoControle}" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
+                Selecionar Peça
             </button>
         `;
         listaDiv.appendChild(cartao);
