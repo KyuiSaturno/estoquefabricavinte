@@ -65,10 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
         filtroPromo.addEventListener("change", aplicarFiltroVisual);
     }
 
-    // Gatilho para o botão de confirmação de Baixa
+    // Gatilho para o botão de confirmação de Baixa (Caractere oculto corrigido aqui!)
     const btnConfirmar = document.getElementById("btn-confirmar");
     if (btnConfirmar) {
-        btnConfirmar.addEventListener("click",骗confirmarBaixa);
+        btnConfirmar.addEventListener("click", confirmarBaixa);
     }
 
     // Gatilho para o botão Sair
@@ -105,7 +105,7 @@ function configurarEstadoInicialVisual() {
     const painelPrincipal = document.getElementById("painel-principal");
     const navMobile = document.getElementById("nav-mobile-sistema");
 
-    // Injeta estilização limpa e moderna para o painel de Login sem quebrar o HTML
+    // Injeta estilização limpa e moderna para o painel de Login e corrige a proporção 1:1 das fotos
     if (!document.getElementById("estilo-login-custom")) {
         const estilo = document.createElement("style");
         estilo.id = "estilo-login-custom";
@@ -198,13 +198,24 @@ function configurarEstadoInicialVisual() {
                 font-weight: 500;
                 min-height: 18px;
             }
+            
+            /* REGRA DE OUTRO: FORÇA TODAS AS IMAGENS DO CARROSSEL A SEREM 1:1 SEM DISTORCER */
+            .carrossel img {
+                width: 100% !important;
+                aspect-ratio: 1 / 1 !important;
+                object-fit: cover !important;
+                display: none;
+            }
+            .carrossel img.ativa {
+                display: block !important;
+            }
         `;
         document.head.appendChild(estilo);
     }
 
     if (telaLogin) {
         telaLogin.classList.remove("escondido");
-        telaLogin.style.display = ""; // Força renderização do CSS padrão
+        telaLogin.style.display = ""; 
     }
     if (painelPrincipal) {
         painelPrincipal.classList.add("escondido");
@@ -213,8 +224,7 @@ function configurarEstadoInicialVisual() {
         navMobile.classList.add("escondido");
     }
     
-    // Reseta textos internos de carregamento residual
-    const nomeOperador = document.getElementById("nome-operador");
+    const nomeOperador = document.getElementById("nome-operator");
     if (nomeOperador) nomeOperador.innerText = "Usuário: ";
 }
 
@@ -268,14 +278,12 @@ function alternarSidebarCarrinho(abrir) {
     }
 }
 
-// Função de Saída Segura Total (Logout)
 function fazerLogout() {
     usuarioLogado = "";
     carrinho = [];
     dadosProdutosFiltrados = [];
     indicesImagens = {};
     
-    // Limpa inputs
     const usuarioField = document.getElementById("usuario");
     const senhaField = document.getElementById("senha");
     if (usuarioField) usuarioField.value = "";
@@ -287,7 +295,6 @@ function fazerLogout() {
     const gridProd = document.getElementById("grid-produtos");
     if (gridProd) gridProd.innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
     
-    // Força alteração drástica de exibição para evitar a tela cinza
     const painelPrincipal = document.getElementById("painel-principal");
     if (painelPrincipal) painelPrincipal.classList.add("escondido");
     
@@ -352,12 +359,14 @@ async function fazerLogin() {
             if (nomeOperador) nomeOperador.innerText = `Usuário: ${usuarioLogado}`;
             
             const telaLogin = document.getElementById("tela-login");
-            if (telaLogin) telaLogin.classList.add("escondido");
+            if (telaLogin) {
+                telaLogin.classList.add("escondido");
+                telaLogin.style.setProperty("display", "none", "important"); // Oculta o login completamente
+            }
 
             const painelPrincipal = document.getElementById("painel-principal");
             if (painelPrincipal) painelPrincipal.classList.remove("escondido");
             
-            // Controle apurado de visibilidade do menu inferior mobile
             const navMobile = document.getElementById("nav-mobile-sistema");
             if (navMobile) {
                 if (window.innerWidth <= 768) {
@@ -425,7 +434,7 @@ async function carregarCategoriasDinamicas() {
 }
 
 // ==========================================
-// FILTRAGEM E EXIBIÇÃO DE PRODUTOS (REVISADO)
+// FILTRAGEM E EXIBIÇÃO DE PRODUTOS
 // ==========================================
 async function filtrarPorCategoria() {
     const categoriaSelecionada = document.getElementById("filtro-categoria").value;
@@ -454,7 +463,6 @@ async function filtrarPorCategoria() {
         const resultado = await resposta.json();
 
         if (resultado.sucesso) {
-            // CORREÇÃO: Garante o mapeamento do nome da aba ativa direto no corpo de cada produto
             dadosProdutosFiltrados = resultado.produtos.map(p => {
                 return { ...p, categoria: p.categoria || categoriaSelecionada };
             });
@@ -530,7 +538,7 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
                 imagensHTML += `<img src="${url}" class="${classeAtiva}" data-index="${index}" alt="${produto.nome}">`;
             });
         } else {
-            imagensHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
+            imagesHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
         }
 
         let botoesCarrossel = "";
@@ -548,7 +556,6 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
 
         const tagPromoHTML = usarEstoquePromo ? `<div style="position: absolute; top: 10px; left: 10px; background-color: var(--cor-erro); color: white; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">Promoção</div>` : '';
 
-        // ALTERAÇÃO: Remove o caractere '#' do nome na hora de renderizar os cartões na tela
         const nomeFormatado = produto.nome.replace("#", "").trim();
 
         const cartao = document.createElement("div");
@@ -646,7 +653,7 @@ function mudarFoto(idUnicoControle, totalFotos, direcao) {
 }
 
 // ==========================================
-// REGRAS DO CARRINHO DE TRANSMISSÃO
+// REGRAS DO CARRINHO DE RETIRADA
 // ==========================================
 function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
@@ -662,7 +669,6 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
 
     const itemExistente = carrinho.find(item => String(item.id) === String(produtoId) && item.corSelecionada === corSelecionada && item.promocional === usarEstoquePromo);
 
-    // ALTERAÇÃO: Remove o caractere '#' do nome para salvar de forma limpa no carrinho também
     const nomeLimpo = produto.nome.replace("#", "").trim();
 
     if (itemExistente) {
@@ -691,6 +697,10 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
 function silverwareDelete(index) {
     carrinho.splice(index, 1);
     atualizarInterfaceCarrinho();
+}
+
+function BlackQuantidadeCarrinho(index, alteracao) {
+    alterarQuantidadeCarrinho(index, alteracao);
 }
 
 function alterarQuantidadeCarrinho(index, alteracao) {
@@ -752,6 +762,7 @@ function atualizarInterfaceCarrinho() {
     if (btnConfirmarMobile) btnConfirmarMobile.disabled = false;
 }
 
+// SUPER OTIMIZAÇÃO: Envia o carrinho inteiro de uma vez só em lote para o servidor!
 async function confirmarBaixa() {
     const elementoDestino = document.getElementById("select-destino");
     if (!elementoDestino) return;
@@ -768,31 +779,34 @@ async function confirmarBaixa() {
     }
 
     try {
-        for (let item of carrinho) {
-            const params = new URLSearchParams();
-            params.append("dados", JSON.stringify({
-                acao: "darBaixa",
-                tipo: item.categoriaOrigem,
-                usuario: usuarioLogado,
-                localizacao: localizacao,
-                isPromo: item.promocional, 
-                carrinho: [item]
-            }));
+        const params = new URLSearchParams();
+        // Mandamos o array do carrinho inteiro com todos os itens juntos
+        params.append("dados", JSON.stringify({
+            acao: "darBaixa",
+            tipo: carrinho[0].categoriaOrigem, // Usa a categoria base do lote
+            usuario: usuarioLogado,
+            localizacao: localizacao,
+            isPromo: carrinho[0].promocional, 
+            carrinho: carrinho 
+        }));
 
-            const resposta = await fetch(WEB_APP_URL, {
-                method: "POST",
-                body: params,
-                headers: { "Content-Type": "application/x-www-form-urlencoded" }
-            });
-            await resposta.json();
-        }
-
-        alert("Baixa processada com sucesso!");
-        carrinho = [];
-        alternarSidebarCarrinho(false);
-        atualizarInterfaceCarrinho();
+        const resposta = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: params,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        });
         
-        filtrarPorCategoria();
+        const resultado = await resposta.json();
+
+        if (resultado.sucesso) {
+            alert("Baixa processada com sucesso!");
+            carrinho = [];
+            alternarSidebarCarrinho(false);
+            atualizarInterfaceCarrinho();
+            filtrarPorCategoria();
+        } else {
+            alert("Erro no estoque: " + resultado.erro);
+        }
 
     } catch (erro) {
         console.error("Erro na baixa:", erro);
