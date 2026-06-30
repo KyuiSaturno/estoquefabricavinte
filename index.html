@@ -8,7 +8,28 @@
 </head>
 <body>
 
-    <div id="painel-principal">
+    <div id="tela-login" class="tela-login-container">
+        <div class="card-login">
+            <h2>SGV - Jeri 20</h2>
+            <p>Insira suas credenciais para acessar o catálogo</p>
+            
+            <div class="seletor-grupo">
+                <label for="usuario">Usuário:</label>
+                <input type="text" id="usuario" placeholder="Digite seu usuário">
+            </div>
+            
+            <div class="seletor-grupo">
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha" placeholder="Digite sua senha">
+            </div>
+            
+            <p id="erro-login" class="erro-mensagem" style="color: #ff4d4d; font-weight: bold; margin-bottom: 15px; text-align: center;"></p>
+            
+            <button id="btn-login" class="btn-adicionar" style="width: 100%; font-size: 16px; padding: 12px;">Entrar</button>
+        </div>
+    </div>
+
+    <div id="painel-principal" class="escondido">
         
         <header class="barra-superior">
             <div class="logo-texto">JERI 20</div>
@@ -60,7 +81,9 @@
             <h3>Destino da Mercadoria:</h3>
             <div class="seletor-grupo" style="margin-bottom: 20px;">
                 <select id="select-destino">
-                    </select>
+                    <option value="Loja Física Jeri">Loja Física Jeri</option>
+                    <option value="Estoque Central">Estoque Central</option>
+                </select>
             </div>
 
             <h3>Itens Selecionados</h3>
@@ -76,7 +99,7 @@
 
     <div id="overlay-carrinho" class="overlay-escuro"></div>
 
-    <nav class="bottom-nav">
+    <nav id="nav-mobile-sistema" class="bottom-nav escondido">
         <button class="bottom-nav-item ativa" id="btn-nav-produtos">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6-6h4V4h-4v4zm6-4v4h4V4h-4zm-6 6h4v-4h-4v4zm6 0h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
             Catálogo
