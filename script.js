@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Função para garantir que apenas a tela de login apareça no recarregamento (F5)
+// Atualizada para herdar perfeitamente a identidade visual Dark/Gold do painel principal
 function configurarEstadoInicialVisual() {
     alternarSidebarCarrinho(false);
     
@@ -105,7 +106,7 @@ function configurarEstadoInicialVisual() {
     const painelPrincipal = document.getElementById("painel-principal");
     const navMobile = document.getElementById("nav-mobile-sistema");
 
-    // Injeta estilização limpa e moderna para o painel de Login e corrige a proporção 1:1 das fotos
+    // Injeta a estilização idêntica ao tema Dark do catálogo
     if (!document.getElementById("estilo-login-custom")) {
         const estilo = document.createElement("style");
         estilo.id = "estilo-login-custom";
@@ -115,91 +116,95 @@ function configurarEstadoInicialVisual() {
                 align-items: center;
                 justify-content: center;
                 min-height: 100vh;
-                background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+                background-color: #121212;
                 font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
                 padding: 20px;
                 box-sizing: border-box;
             }
             #tela-login .container, #tela-login .login-box, .box-login, #tela-login > div:not(.escondido) {
-                background: #ffffff;
+                background: #1e1e1e;
                 padding: 40px 30px;
-                border-radius: 16px;
-                box-shadow: 0 10px 25px rgba(160, 175, 195, 0.15);
+                border-radius: 12px;
+                border: 1px solid #2d2d2d;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
                 width: 100%;
                 max-width: 380px;
                 text-align: center;
                 box-sizing: border-box;
             }
             #tela-login h2, #tela-login h1 {
-                color: #2d3748;
-                font-size: 24px;
+                color: #ffffff;
+                font-size: 26px;
                 margin-top: 0;
-                margin-bottom: 24px;
-                font-weight: 600;
-                letter-spacing: -0.5px;
+                margin-bottom: 30px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
             }
             #tela-login .form-grupo, #tela-login div {
-                margin-bottom: 16px;
+                margin-bottom: 20px;
                 text-align: left;
             }
             #tela-login label {
                 display: block;
-                color: #4a5568;
-                font-size: 13px;
+                color: #b3b3b3;
+                font-size: 12px;
                 font-weight: 600;
-                margin-bottom: 6px;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
             #tela-login input[type="text"], #tela-login input[type="password"] {
                 width: 100%;
                 padding: 12px 14px;
-                border: 1.5px solid #e2e8f0;
-                border-radius: 8px;
+                border: 1px solid #3d3d3d;
+                border-radius: 6px;
                 font-size: 15px;
-                color: #2d3748;
-                background-color: #f8fafc;
+                color: #ffffff;
+                background-color: #252525;
                 box-sizing: border-box;
                 transition: all 0.2s ease;
             }
             #tela-login input:focus {
                 outline: none;
-                border-color: #4f46e5;
-                background-color: #ffffff;
-                box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+                border-color: #ffcc00;
+                background-color: #2d2d2d;
+                box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.1);
             }
             #tela-login button {
                 width: 100%;
                 padding: 14px;
-                background: linear-gradient(90deg, #4f46e5 0%, #4338ca 100%);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 16px;
-                font-weight: 600;
+                background-color: transparent;
+                color: #ffcc00;
+                border: 1.5px solid #ffcc00;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
                 cursor: pointer;
-                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
                 transition: all 0.2s ease;
-                margin-top: 8px;
+                margin-top: 10px;
             }
             #tela-login button:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 6px 15px rgba(79, 70, 229, 0.25);
+                background-color: #ffcc00;
+                color: #121212;
             }
             #tela-login button:disabled {
-                background: #a5b4fc;
+                border-color: #555555;
+                color: #555555;
                 cursor: not-allowed;
-                transform: none;
-                box-shadow: none;
+                background-color: transparent;
             }
             #erro-login {
-                color: #e53e3e;
+                color: #ff4d4d;
                 font-size: 13px;
-                margin-top: 12px;
+                margin-top: 15px;
                 text-align: center;
                 font-weight: 500;
                 min-height: 18px;
             }
             
-            /* REGRA DE OUTRO: FORÇA TODAS AS IMAGENS DO CARROSSEL A SEREM 1:1 SEM DISTORCER */
+            /* Mantém a proporção 1:1 das fotos do catálogo */
             .carrossel img {
                 width: 100% !important;
                 aspect-ratio: 1 / 1 !important;
