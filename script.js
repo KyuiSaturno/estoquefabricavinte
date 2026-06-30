@@ -1,4 +1,4 @@
-// Mantenha aqui a sua URL do Apps Script gerada no último passo
+// Mantenha aqui a sua URL do Apps Script gerada no seu painel
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz5wtsSda51rruXfp6k2vgu3Oj7FuP_uNJqnJypJ_ft8FC9OToInhlO7PmGF4XZbOij/exec";
 
 // Variáveis globais do sistema
@@ -11,8 +11,8 @@ let indicesImagens = {};
 // EXECUTA ASSIM QUE A PÁGINA CARREGA
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-    // Garante que o carrinho comece fechado no carregamento original
-    alternarSidebarCarrinho(false);
+    // Força o estado correto de inicialização visual na marra
+    configurarEstadoInicialVisual();
 
     // Ouvinte para o botão de Entrar na tela de login
     const btnLoginSubmit = document.getElementById("btn-login");
@@ -84,11 +84,42 @@ document.addEventListener("DOMContentLoaded", () => {
             const abaCarrinho = document.getElementById("aba-carrinho");
             if (abaProdutos) abaProdutos.classList.remove("exibir-mobile");
             if (abaCarrinho) abaCarrinho.classList.remove("exibir-mobile");
+            
+            const navMobile = document.getElementById("nav-mobile-sistema");
+            if (navMobile) navMobile.classList.add("escondido");
         } else {
             alternarSidebarCarrinho(false);
+            if (usuarioLogado) {
+                const navMobile = document.getElementById("nav-mobile-sistema");
+                if (navMobile) navMobile.classList.remove("escondido");
+            }
         }
     });
 });
+
+// Função para garantir que apenas a tela de login apareça no recarregamento (F5)
+function configurarEstadoInicialVisual() {
+    alternarSidebarCarrinho(false);
+    
+    const telaLogin = document.getElementById("tela-login");
+    const painelPrincipal = document.getElementById("painel-principal");
+    const navMobile = document.getElementById("nav-mobile-sistema");
+
+    if (telaLogin) {
+        telaLogin.classList.remove("escondido");
+        telaLogin.style.display = ""; // Força renderização do CSS padrão
+    }
+    if (painelPrincipal) {
+        painelPrincipal.classList.add("escondido");
+    }
+    if (navMobile) {
+        navMobile.classList.add("escondido");
+    }
+    
+    // Reseta textos internos de carregamento residual
+    const nomeOperador = document.getElementById("nome-operador");
+    if (nomeOperador) nomeOperador.innerText = "Usuário: ";
+}
 
 // ==========================================
 // CONTROLADOR DE NAVEGAÇÃO E SIDEBAR (GAVETA)
@@ -99,9 +130,7 @@ function alternarAbaSistemas(abaDestino) {
     const btnMbProdutos = document.getElementById("btn-nav-produtos");
     const btnMbCarrinho = document.getElementById("btn-nav-carrinho");
 
-    // EXECUÇÃO EM MODO CELULAR / MOBILE (Telas menores ou iguais a 768px)
     if (window.innerWidth <= 768) {
-        // Garante que os efeitos visuais de desktop fiquem desativados no mobile
         alternarSidebarCarrinho(false);
 
         if (abaDestino === 'produtos') {
@@ -120,7 +149,6 @@ function alternarAbaSistemas(abaDestino) {
     } 
 }
 
-// Função unificada para controlar abertura, fechamento e overlay no desktop
 function alternarSidebarCarrinho(abrir) {
     const sidebar = document.getElementById("aba-carrinho");
     const overlay = document.getElementById("overlay-carrinho");
@@ -138,20 +166,19 @@ function alternarSidebarCarrinho(abrir) {
             if (overlay) overlay.classList.remove("visivel");
         }
     } else {
-        // Fallback preventivo para evitar que trave classes residuais no mobile
         if (sidebar) sidebar.classList.remove("aberta");
         if (overlay) overlay.classList.remove("visivel");
     }
 }
 
-// Função de Saída Segura (Logout)
+// Função de Saída Segura Total (Logout)
 function fazerLogout() {
     usuarioLogado = "";
     carrinho = [];
     dadosProdutosFiltrados = [];
     indicesImagens = {};
     
-    // Limpa campos visuais de formulários se existirem
+    // Limpa inputs
     const usuarioField = document.getElementById("usuario");
     const senhaField = document.getElementById("senha");
     if (usuarioField) usuarioField.value = "";
@@ -163,7 +190,7 @@ function fazerLogout() {
     const gridProd = document.getElementById("grid-produtos");
     if (gridProd) gridProd.innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
     
-    // Reseta visibilidade das telas
+    // Força alteração drástica de exibição para evitar a tela cinza
     const painelPrincipal = document.getElementById("painel-principal");
     if (painelPrincipal) painelPrincipal.classList.add("escondido");
     
@@ -171,13 +198,18 @@ function fazerLogout() {
     if (navMobile) navMobile.classList.add("escondido");
     
     const telaLogin = document.getElementById("tela-login");
-    if (telaLogin) telaLogin.classList.remove("escondido");
+    if (telaLogin) {
+        telaLogin.classList.remove("escondido");
+    }
     
     const btnLogin = document.getElementById("btn-login");
     if (btnLogin) {
         btnLogin.innerText = "Entrar";
         btnLogin.disabled = false;
     }
+    
+    const erroLogin = document.getElementById("erro-login");
+    if (erroLogin) erroLogin.innerText = "";
     
     alternarSidebarCarrinho(false);
     atualizarInterfaceCarrinho();
@@ -228,9 +260,14 @@ async function fazerLogin() {
             const painelPrincipal = document.getElementById("painel-principal");
             if (painelPrincipal) painelPrincipal.classList.remove("escondido");
             
+            // Controle apurado de visibilidade do menu inferior mobile
             const navMobile = document.getElementById("nav-mobile-sistema");
             if (navMobile) {
-                navMobile.classList.remove("escondido");
+                if (window.innerWidth <= 768) {
+                    navMobile.classList.remove("escondido");
+                } else {
+                    navMobile.classList.add("escondido");
+                }
             }
             
             if (window.innerWidth > 768) {
@@ -284,7 +321,6 @@ async function carregarCategoriasDinamicas() {
                 opcao.innerText = aba;
                 seletor.appendChild(opcao);
             });
-            console.log("Categorias carregadas com sucesso:", resultado.abas);
         }
     } catch (erro) {
         console.error("Erro ao carregar categorias dinâmicas:", erro);
@@ -394,7 +430,7 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
                 imagensHTML += `<img src="${url}" class="${classeAtiva}" data-index="${index}" alt="${produto.nome}">`;
             });
         } else {
-            imagensHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
+            imagesHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
         }
 
         let botoesCarrossel = "";
