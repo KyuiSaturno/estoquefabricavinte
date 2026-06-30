@@ -328,7 +328,7 @@ async function carregarCategoriasDinamicas() {
 }
 
 // ==========================================
-// FILTRAGEM E EXIBIÇÃO DE PRODUTOS
+// FILTRAGEM E EXIBIÇÃO DE PRODUTOS (REVISADO)
 // ==========================================
 async function filtrarPorCategoria() {
     const categoriaSelecionada = document.getElementById("filtro-categoria").value;
@@ -357,7 +357,10 @@ async function filtrarPorCategoria() {
         const resultado = await resposta.json();
 
         if (resultado.sucesso) {
-            dadosProdutosFiltrados = resultado.produtos;
+            // CORREÇÃO: Garante o mapeamento do nome da aba ativa direto no corpo de cada produto
+            dadosProdutosFiltrados = resultado.produtos.map(p => {
+                return { ...p, categoria: p.categoria || categoriaSelecionada };
+            });
             aplicarFiltroVisual();
         } else {
             if (containerFiltrados) containerFiltrados.innerHTML = `<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro ao buscar categoria: ${resultado.erro}</p>`;
@@ -430,7 +433,6 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
                 imagensHTML += `<img src="${url}" class="${classeAtiva}" data-index="${index}" alt="${produto.nome}">`;
             });
         } else {
-            // CORRIGIDO: de imagesHTML para imagensHTML para bater com a variável do topo
             imagensHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
         }
 
@@ -568,6 +570,9 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
             return;
         }
     } else {
+        // CORREÇÃO: Garante uma categoria válida para evitar travar o fluxo em outras abas
+        const categoriaAtiva = produto.categoria || document.getElementById("filtro-categoria").value;
+
         carrinho.push({
             id: produtoId,
             nome: produto.nome + (usarEstoquePromo ? " (PROMO)" : ""),
@@ -575,7 +580,7 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
             quantidade: 1,
             maximo: estoqueMaximo,
             promocional: usarEstoquePromo,
-            categoriaOrigem: produto.categoria || document.getElementById("filtro-categoria").value
+            categoriaOrigem: categoriaAtiva
         });
     }
     atualizarInterfaceCarrinho();
