@@ -20,7 +20,7 @@ function alternarAbaSistemas(abaDestino) {
     const btnMbProdutos = document.getElementById("btn-nav-produtos");
     const btnMbCarrinho = document.getElementById("btn-nav-carrinho");
 
-    // EXECUÇÃO EM MODO CELULAR (Telas menores que 768px)
+    // EXECUÇÃO EM MODO CELULAR (Telas menores ou iguais a 768px)
     if (window.innerWidth <= 768) {
         if (abaDestino === 'produtos') {
             if (abaProdutos) abaProdutos.classList.add("exibir-mobile");
@@ -38,13 +38,16 @@ function alternarAbaSistemas(abaDestino) {
     } 
     // EXECUÇÃO EM MODO DESKTOP / PC
     else {
-        // Exibe ambos na tela em modo coluna conforme design do seu PC
+        // No PC, remove as classes mobile para garantir que o layout CSS em Grid/Colunas do PC volte a funcionar
         if (abaProdutos) abaProdutos.classList.remove("exibir-mobile");
         if (abaCarrinho) abaCarrinho.classList.remove("exibir-mobile");
         
         if (abaDestino === 'produtos') {
             if (btnPcProdutos) btnPcProdutos.classList.add("ativa");
             if (btnPcCarrinho) btnPcCarrinho.classList.remove("ativa");
+        } else if (abaDestino === 'carrinho') {
+            if (btnPcCarrinho) btnPcCarrinho.classList.add("ativa");
+            if (btnPcProdutos) btnPcProdutos.classList.remove("ativa");
         }
     }
 }
@@ -87,12 +90,18 @@ async function fazerLogin() {
             usuarioLogado = usuarioInput;
             document.getElementById("nome-operador").innerText = `Usuário: ${usuarioLogado}`;
             
-            // Faz a troca de telas ocultando o login e revelando o painel
+            // Oculta a tela de login e revela o painel do PC
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
             
-            // Força a aba do catálogo a ficar visualmente ativa por segurança
-            alternarAba('produtos');
+            // EXCLUSIVO MOBILE: Mostra a barra inferior apenas se for um celular
+            const navMobile = document.getElementById("nav-mobile-sistema");
+            if (navMobile) {
+                navMobile.classList.remove("escondido");
+            }
+            
+            // Inicializa mostrando o catálogo por padrão
+            alternarAbaSistemas('produtos');
             
             // Carrega a listagem das abas/categorias vindas da Planilha
             carregarCategoriasDinamicas();
