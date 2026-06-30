@@ -45,7 +45,7 @@ body {
     animation: surgimentoSuave 0.4s ease forwards;
 }
 
-/* Barra Superior (Header) Reorganizada */
+/* Barra Superior (Header) */
 .barra-superior {
     display: flex;
     justify-content: space-between;
@@ -138,9 +138,9 @@ body {
     display: none !important;
 }
 
-/* Área de Conteúdo Principal (Agora em 1 Coluna Inteira no PC) */
+/* Área de Conteúdo Principal (1 Coluna Inteira no PC) */
 .conteudo-principal {
-    display: block; /* Remove o grid antigo de 2 colunas */
+    display: block;
     width: 100%;
 }
 
@@ -199,7 +199,7 @@ body {
 /* Grid de Produtos Otimizado em Tela Cheia no PC */
 .grid-produtos {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* Aumentado para 4 itens por linha aproveitando o espaço total */
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
 }
 
@@ -335,12 +335,12 @@ body {
 }
 
 /* ==========================================
-   ESTRUTURA DA GAVETA LATERAL DO CARRINHO (SIDEBAR)
+   ESTRUTURA DA GAVETA LATERAL DO CARRINHO (SIDEBAR DESKTOP)
    ========================================== */
-.sidebar-gaveta-carrinho {
+#aba-carrinho.sidebar-gaveta-carrinho {
     position: fixed;
     top: 0;
-    right: -420px; /* Escondido por padrão para fora da tela */
+    right: -400px; /* Perfeitamente alinhado com a largura */
     width: 400px;
     height: 100vh;
     background-color: var(--cor-fundo-card);
@@ -349,11 +349,11 @@ body {
     display: flex;
     flex-direction: column;
     border-left: 1px solid #333333;
-    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transição suave de deslize */
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar-gaveta-carrinho.aberta {
-    right: 0; /* Desliza para dentro da tela */
+#aba-carrinho.sidebar-gaveta-carrinho.aberta {
+    right: 0; /* Desliza para a tela */
 }
 
 .sidebar-carrinho-header {
@@ -390,9 +390,9 @@ body {
 .sidebar-carrinho-corpo {
     flex: 1;
     padding: 25px;
-    overflow-y: hidden;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .sidebar-carrinho-corpo h3 {
@@ -403,9 +403,10 @@ body {
     letter-spacing: 0.5px;
 }
 
-.sidebar-scroll-itens {
+/* Container interno com rolagem para os itens do carrinho */
+#itens-carrinho {
     flex: 1;
-    overflow-y: auto; /* Rolagem independente interna apenas para os itens */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -432,8 +433,49 @@ body {
     font-size: 14px;
 }
 
-/* Camada Fundo Escuro */
-.overlay-escuro {
+/* Linha de cada item adicionado ao carrinho */
+.item-carrinho-linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1A1A1A;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #333333;
+    gap: 10px;
+}
+
+.item-carrinho-linha strong {
+    font-size: 14px;
+    color: var(--cor-texto-claro);
+}
+
+.item-carrinho-linha small {
+    color: #888888;
+    font-size: 12px;
+}
+
+.item-carrinho-linha button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.item-carrinho-linha div button {
+    background-color: #333333;
+    color: white;
+}
+
+.item-carrinho-linha div button:hover {
+    background-color: var(--cor-principal);
+    color: var(--cor-texto-escuro);
+}
+
+/* Camada Fundo Escuro (Overlay) */
+#overlay-carrinho.overlay-escuro {
     position: fixed;
     top: 0;
     left: 0;
@@ -442,10 +484,10 @@ body {
     background: rgba(0, 0, 0, 0.65);
     z-index: 9999;
     display: none;
-    backdrop-filter: blur(2px); /* Efeito desfocado leve no fundo */
+    backdrop-filter: blur(2px);
 }
 
-.overlay-escuro.visivel {
+#overlay-carrinho.overlay-escuro.visivel {
     display: block;
 }
 
@@ -487,10 +529,11 @@ body {
     }
 }
 
-/* Smartphones e tablets compactos */
-@media (max-width: 850px) {
+/* Smartphones e tablets compactos (Mobile/Ambiente Celular) */
+@media (max-width: 768px) {
     body {
         padding: 10px;
+        padding-bottom: 85px !important; /* Libera espaço para a barra inferior */
     }
 
     .barra-superior {
@@ -512,11 +555,11 @@ body {
     }
 
     /* Esconde os botões de controle Desktop no Mobile */
-    .btn-carrinho-topo-pc, .btn-sair-desktop {
+    .btn-carrinho-topo-pc, .btn-sair-desktop, .btn-fechar-sidebar {
         display: none !important;
     }
 
-    /* O catálogo volta a ocupar 2 itens por linha no mobile com visual perfeito */
+    /* O catálogo ocupa 2 itens por linha no mobile */
     .grid-produtos {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
@@ -538,12 +581,117 @@ body {
         font-size: 13px;
     }
     
-    /* Força desativação da sidebar/gaveta física em telas mobile para usar a aba mobile nativa */
-    .sidebar-gaveta-carrinho {
+    .conteudo-principal {
+        display: block !important;
+    }
+
+    #aba-produtos, #aba-carrinho {
         display: none !important;
     }
-    .overlay-escuro {
+
+    #aba-produtos.exibir-mobile {
+        display: block !important;
+    }
+
+    /* Configura o container do carrinho mobile para agir nativamente em tela cheia */
+    #aba-carrinho.exibir-mobile {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        box-shadow: none !important;
+        border: 1px solid #333333 !important;
+        background-color: var(--cor-fundo-card) !important;
+        display: block !important;
+        border-radius: 10px;
+        padding: 20px;
+    }
+
+    #aba-carrinho.exibir-mobile .sidebar-carrinho-corpo {
+        padding: 0;
+        overflow: visible;
+    }
+
+    #itens-carrinho {
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+
+    /* Fundo escuro desnecessário no mobile */
+    #overlay-carrinho.overlay-escuro {
         display: none !important;
+    }
+
+    /* BARRA DE NAVEGAÇÃO INFERIOR MOBILE */
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 65px;
+        background: var(--cor-fundo-card); 
+        border-top: 1px solid #333333;
+        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+        z-index: 99999;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+
+    .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--cor-texto-claro); 
+        text-decoration: none;
+        font-size: 0.75rem;
+        font-weight: 600;
+        opacity: 0.7;
+        transition: all 0.2s ease;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        flex: 1;
+        position: relative;
+    }
+
+    .bottom-nav-item svg {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 3px;
+        transition: transform 0.2s;
+    }
+
+    .bottom-nav-item.ativa {
+        opacity: 1;
+        color: var(--cor-principal); 
+    }
+
+    .badge-contador {
+        position: absolute;
+        top: 2px;
+        right: 32%;
+        background-color: var(--cor-erro);
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: bold;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        box-sizing: border-box;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: transform 0.2s ease;
+    }
+
+    .badge-animar {
+        transform: scale(1.3);
     }
 }
 
@@ -600,115 +748,4 @@ body {
 
 .bloco-card-login input:focus {
     border-color: var(--cor-principal);
-}
-
-/* =======================================================
-   BARRA DE NAVEGAÇÃO INFERIOR MOBILE (MANTIDA INTEGRALMENTE)
-   ======================================================= */
-.bottom-nav {
-    display: none;
-}
-
-@media (max-width: 768px) {
-    .conteudo-principal {
-        display: block !important;
-    }
-
-    #aba-produtos, #aba-carrinho {
-        display: none;
-    }
-
-    #aba-produtos.exibir-mobile, #aba-carrinho.exibir-mobile {
-        display: block !important;
-    }
-    
-    /* Configura o container do carrinho mobile para se comportar de forma padrão em tela cheia */
-    #aba-carrinho.exibir-mobile {
-        position: static;
-        width: 100%;
-        height: auto;
-        box-shadow: none;
-        border: 1px solid #333333;
-        display: block !important;
-    }
-    
-    #itens-carrinho {
-        max-height: none;
-        overflow-y: visible;
-    }
-
-    .bottom-nav {
-        display: flex;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 65px;
-        background: var(--cor-fundo-card, #262626); 
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
-        z-index: 99999;
-        justify-content: space-around;
-        align-items: center;
-        padding: 0 10px;
-        box-sizing: border-box;
-    }
-
-    .bottom-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: var(--cor-texto-claro, #FFFFFF); 
-        text-decoration: none;
-        font-size: 0.75rem;
-        font-weight: 600;
-        opacity: 0.7;
-        transition: all 0.2s ease;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 5px;
-        flex: 1;
-    }
-
-    .bottom-nav-item svg {
-        width: 24px;
-        height: 24px;
-        margin-bottom: 3px;
-        transition: transform 0.2s;
-    }
-
-    .bottom-nav-item.ativa {
-        opacity: 1;
-        color: var(--cor-principal, #4f46e5); 
-    }
-
-    .badge-contador {
-        position: absolute;
-        top: 2px;
-        right: 22%;
-        background-color: var(--cor-principal);
-        color: #ffffff;
-        font-size: 11px;
-        font-weight: bold;
-        min-width: 18px;
-        height: 18px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 4px;
-        box-sizing: border-box;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        transition: transform 0.2s ease;
-    }
-
-    .badge-animar {
-        transform: scale(1.3);
-    }
-
-    body {
-        padding-bottom: 85px !important;
-    }
 }
