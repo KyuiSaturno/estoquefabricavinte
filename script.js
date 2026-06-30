@@ -54,8 +54,20 @@ function fecharCarrinhoGaveta() {
     if (overlay) overlay.classList.remove("visivel");
 }
 
+// Função de transição exigida pelo botão do topo do PC
+function alternarSidebarCarrinho() {
+    const gaveta = document.getElementById("gaveta-carrinho-desktop");
+    if (gaveta) {
+        if (gaveta.classList.contains("aberta")) {
+            fecharCarrinhoGaveta();
+        } else {
+            abrirCarrinhoGaveta();
+        }
+    }
+}
+
 // Função de Saída Segura (Logout)
-function realizarLogout() {
+function fazerLogout() {
     usuarioLogado = "";
     carrinho = [];
     dadosProdutosFiltrados = [];
