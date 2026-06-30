@@ -203,11 +203,33 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         const primeiraCor = coresDisponiveis[0] || "Padrão";
         const estoqueInicial = mapaEstoqueAlvo[primeiraCor] || 0;
 
+        // CORREÇÃO DA IMAGEM INICIAL: Descobre qual imagem exibir de acordo com a primeira cor disponível
+        const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
+        const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
+
         let imagensHTML = "";
         if (produto.imagens && produto.imagens.length > 0) {
             produto.imagens.forEach((url, index) => {
-                imagensHTML += `<img src="${url}" class="${index === 0 ? 'ativa' : ''}" data-index="${index}" alt="${produto.nome}">`;
+                // Se achou uma imagem específica para a primeira cor do select, ela começa ativa. 
+                // Se não achou, a primeiríssima imagem (index 0) começa ativa.
+                let classeAtiva = "";
+                if (urlImagemInicial) {
+                    if (url === urlImagemInicial || urlImagemInicial.includes(url)) {
+                        classeAtiva = "ativa";
+                        indicesImagens[idUnicoControle] = index; // Sincroniza o índice do carrossel corretamente
+                    }
+                } else if (index === 0) {
+                    classeAtiva = "ativa";
+                }
+                
+                imagensHTML += `<img src="${url}" class="${classeAtiva}" data-index="${index}" alt="${produto.nome}">`;
             });
+            
+            // Caso o loop tenha rodado e nenhuma imagem tenha ficado ativa por segurança, força a primeira
+            if (!imagensHTML.includes('class="ativa"')) {
+                imagensHTML = imagensHTML.replace('data-index="0"', 'class="ativa" data-index="0"');
+                indicesImagens[idUnicoControle] = 0;
+            }
         } else {
             imagensHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
         }
@@ -253,9 +275,6 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
             </button>
         `;
         listaDiv.appendChild(cartao);
-
-        // CORREÇÃO DEFINITIVA: Dispara o gatilho nativo para sincronizar a imagem e manter o evento 'onchange' vivo
-        atualizarStatusEstoque(produto.id, prefixoContexto, usarEstoquePromo);
     });
 }
 
