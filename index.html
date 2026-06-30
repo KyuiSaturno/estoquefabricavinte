@@ -1,98 +1,98 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Jeri 20 - Estoque</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Jeri 20 - Estoque</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="tela-login" class="bloco-card-login">
-        <div class="login-header">
-            <span class="logo-texto">JERI 20</span>
-            <p>Insira suas credenciais para acessar o estoque</p>
-        </div>
-        
-        <div class="seletor-grupo">
-            <label for="usuario">Usuário:</label>
-            <input type="text" id="usuario" placeholder="Digite seu usuário">
-        </div>
+    <div id="tela-login" class="bloco-card-login">
+        <div class="login-header">
+            <span class="logo-texto">JERI 20</span>
+            <p>Insira suas credenciais para acessar o estoque</p>
+        </div>
+        
+        <div class="seletor-grupo">
+            <label for="usuario">Usuário:</label>
+            <input type="text" id="usuario" placeholder="Digite seu usuário">
+        </div>
 
-        <div class="seletor-grupo">
-            <label for="senha">Senha:</label>
-            <input type="password" id="senha" placeholder="Digite sua senha">
-        </div>
+        <div class="seletor-grupo">
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" placeholder="Digite sua senha">
+        </div>
 
-        <p id="erro-login" style="color: var(--cor-erro); font-size: 14px; margin-bottom: 15px; font-weight: 600;"></p>
+        <p id="erro-login" style="color: var(--cor-erro); font-size: 14px; margin-bottom: 15px; font-weight: 600;"></p>
 
-        <button id="btn-login" class="btn-confirmar-baixa" onclick="fazerLogin()">Entrar</button>
-    </div>
+        <button id="btn-login" class="btn-confirmar-baixa" onclick="fazerLogin()">Entrar</button>
+    </div>
 
-    <div id="painel-principal" class="escondido">
-        <header class="barra-superior">
-            <div class="logo-area">
-                <span class="logo-texto">JERI 20</span>
-            </div>
-            <div class="usuario-status">
-                <span id="nome-operador">Usuário: Carregando...</span>
-            </div>
-        </header>
+    <div id="painel-principal" class="escondido">
+        <header class="barra-superior">
+            <div class="logo-area">
+                <span class="logo-texto">JERI 20</span>
+            </div>
+            <div class="usuario-status">
+                <span id="nome-operador">Usuário: Carregando...</span>
+            </div>
+        </header>
 
-        <nav class="abas-navegacao">
-            <button id="btn-aba-produtos" class="btn-aba ativa">Catálogo de Produtos</button>
-        </nav>
+        <nav class="abas-navegacao">
+            <button id="btn-aba-produtos" class="btn-aba ativa">Catálogo de Produtos</button>
+        </nav>
 
-        <main class="conteudo-principal">
-            
-            <div id="aba-produtos" class="bloco-card">
-                <h2>Explorar Catálogo por Categoria</h2>
-                <div class="seletor-grupo-filtro">
-                    <label for="filtro-categoria">Selecionar Categoria:</label>
-                    <select id="filtro-categoria" onchange="filtrarPorCategoria()">
-                        <option value="">-- Escolha uma Categoria --</option>
-                    </select>
-                </div>
+        <main class="conteudo-principal">
+            
+            <div id="aba-produtos" class="bloco-card">
+                <h2>Explorar Catálogo por Categoria</h2>
+                <div class="seletor-grupo-filtro">
+                    <label for="filtro-categoria">Selecionar Categoria:</label>
+                    <select id="filtro-categoria" onchange="filtrarPorCategoria()">
+                        <option value="">-- Escolha uma Categoria --</option>
+                    </select>
+                </div>
 
-                <div style="margin: -5px 0 20px 0; display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="filtro-promocional" onchange="aplicarFiltroVisual()" style="width: 18px; height: 18px; cursor: pointer;">
-                    <label for="filtro-promocional" style="font-size: 14px; font-weight: bold; color: var(--cor-principal); cursor: pointer; user-select: none; display: flex; align-items: center; gap: 4px;">
-                        Promocional 🏷️
-                    </label>
-                </div>
-                
-                <div id="lista-produtos-filtrados" class="grid-produtos">
-                    <p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>
-                </div>
-            </div>
+                <div style="margin: -5px 0 20px 0; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="filtro-promocional" onchange="aplicarFiltroVisual()" style="width: 18px; height: 18px; cursor: pointer;">
+                    <label for="filtro-promocional" style="font-size: 14px; font-weight: bold; color: var(--cor-principal); cursor: pointer; user-select: none; display: flex; align-items: center; gap: 4px;">
+                        Promocional 🏷️
+                    </label>
+                </div>
+                
+                <div id="lista-produtos-filtrados" class="grid-produtos">
+                    <p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>
+                </div>
+            </div>
 
-            <section class="coluna-carrinho bloco-card">
-                <h2>Transmissão de Saída</h2>
-                
-                <div class="seletor-grupo">
-                    <label for="localizacao">Destino da Mercadoria:</label>
-                    <select id="localizacao">
-                        <option value="Loja Física Jeri">Loja Física Jeri</option>
-                        <option value="Loja Física Jijoca">Loja Física Jijoca</option>
-                        <option value="Envio de Pedido">Envio de Pedido</option>
-                    </select>
-                </div>
+            <section class="coluna-carrinho bloco-card">
+                <h2>Transmissão de Saída</h2>
+                
+                <div class="seletor-grupo">
+                    <label for="localizacao">Destino da Mercadoria:</label>
+                    <select id="localizacao">
+                        <option value="Loja Física Jeri">Loja Física Jeri</option>
+                        <option value="Loja Física Jijoca">Loja Física Jijoca</option>
+                        <option value="Envio de Pedido">Envio de Pedido</option>
+                    </select>
+                </div>
 
-                <div class="divisor"></div>
+                <div class="divisor"></div>
 
-                <h3>Itens Selecionados</h3>
-                <div id="itens-carrinho">
-                    <p class="carrinho-vazio">Nenhum item selecionado.</p>
-                </div>
+                <h3>Itens Selecionados</h3>
+                <div id="itens-carrinho">
+                    <p class="carrinho-vazio">Nenhum item selecionado.</p>
+                </div>
 
-                <button id="btn-confirmar" class="btn-confirmar-baixa" onclick="confirmarBaixa()" disabled>
-                    Confirmar
-                </button>
-            </section>
-        </main>
-    </div>
+                <button id="btn-confirmar" class="btn-confirmar-baixa" onclick="confirmarBaixa()" disabled>
+                    Confirmar
+                </button>
+            </section>
+        </main>
+    </div>
 
-    <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
