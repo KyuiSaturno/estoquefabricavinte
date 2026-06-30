@@ -9,6 +9,27 @@
 </head>
 <body>
 
+    <div class="bottom-nav">
+        <button class="bottom-nav-item ativa" id="btn-nav-produtos" onclick="alternarAbaSistemas('produtos')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+            </svg>
+            <span>Catálogo</span>
+        </button>
+        <button class="bottom-nav-item" id="btn-nav-carrinho" onclick="alternarAbaSistemas('carrinho')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01m-.01 4h.01"/>
+            </svg>
+            <span>Transmissão</span>
+        </button>
+        <button class="bottom-nav-item" style="color: var(--cor-erro, #ff4d4d);" onclick="window.location.reload()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            <span>Sair</span>
+        </button>
+    </div>
+
     <div id="tela-login" class="bloco-card-login">
         <div class="login-header">
             <span class="logo-texto">JERI 20</span>
@@ -41,7 +62,8 @@
         </header>
 
         <nav class="abas-navegacao">
-            <button id="btn-aba-produtos" class="btn-aba ativa">Catálogo de Produtos</button>
+            <button id="btn-aba-produtos" class="btn-aba ativa" onclick="alternarAbaSistemas('produtos')">Catálogo de Produtos</button>
+            <button id="btn-aba-carrinho" class="btn-aba" onclick="alternarAbaSistemas('carrinho')">Transmissão de Saída</button>
         </nav>
 
         <main class="conteudo-principal">
@@ -67,7 +89,7 @@
                 </div>
             </div>
 
-            <section class="coluna-carrinho bloco-card">
+            <section id="aba-carrinho" class="coluna-carrinho bloco-card">
                 <h2>Transmissão de Saída</h2>
                 
                 <div class="seletor-grupo">
