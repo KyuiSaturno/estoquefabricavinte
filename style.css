@@ -45,7 +45,7 @@ body {
     animation: surgimentoSuave 0.4s ease forwards;
 }
 
-/* Barra Superior (Header - PC) */
+/* Barra Superior (Header) */
 .barra-superior {
     display: flex;
     justify-content: space-between;
@@ -73,7 +73,7 @@ body {
     border: 1px solid #333333;
 }
 
-/* Menu de Abas de Navegação (PC) */
+/* Menu de Abas de Navegação */
 .abas-navegacao {
     display: flex;
     gap: 10px;
@@ -100,7 +100,7 @@ body {
     border-bottom-color: var(--cor-principal);
 }
 
-/* Área de Conteúdo Principal */
+/* Área de Conteúdo Principal (Split em 2 Colunas para PC) */
 .conteudo-principal {
     display: grid;
     grid-template-columns: 1fr 350px;
@@ -108,6 +108,7 @@ body {
     align-items: start;
 }
 
+/* Estilização Geral dos Blocos (Cards) */
 .bloco-card {
     background-color: var(--cor-fundo-card);
     padding: 25px;
@@ -123,11 +124,6 @@ body {
     color: var(--cor-texto-claro);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-}
-
-/* Elementos de Cabeçalho/Rodapé Mobile (Escondidos no PC) */
-.gaveta-header-mobile, .barra-inferior-mobile {
-    display: none;
 }
 
 /* ==========================================
@@ -163,12 +159,14 @@ body {
     border-color: var(--cor-principal);
 }
 
+/* Grid Travado para renderizar exatamente 3 produtos lado a lado no PC */
 .grid-produtos {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
+/* Cartão do Produto Individual */
 .cartao-produto {
     background-color: #1A1A1A;
     border-radius: 8px;
@@ -179,7 +177,7 @@ body {
     border: 1px solid #333333;
     transition: transform 0.2s ease, border-color 0.2s ease;
     padding: 12px;
-    height: 100%;
+    height: 100%; /* Mantém o alinhamento de altura idêntico nos cards da mesma linha */
 }
 
 .cartao-produto:hover {
@@ -187,19 +185,21 @@ body {
     border-color: var(--cor-principal);
 }
 
+/* Moldura do Carrossel com tamanho máximo controlado */
 .carrossel {
     position: relative;
     width: 100%;
-    height: 220px;
+    height: 220px; /* Mantém uma altura uniforme e profissional */
     background-color: #111111;
     border-radius: 6px;
     overflow: hidden;
 }
 
+/* Tratamento da Imagem para nunca quebrar ou distorcer */
 .carrossel img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Faz o preenchimento proporcional sem esticar a imagem */
     display: none;
 }
 
@@ -207,11 +207,12 @@ body {
     display: block;
 }
 
+/* Botões do Carrossel Ajustados para a Base */
 .btn-carrossel {
     position: absolute;
-    top: auto;
-    bottom: 12px;
-    transform: none;
+    top: auto;                 /* Remove centralização vertical antiga */
+    bottom: 12px;              /* Alinha os botões flutuando na base */
+    transform: none;           /* Remove reset de posicionamento */
     background-color: rgba(0, 0, 0, 0.65);
     color: var(--cor-principal);
     border: none;
@@ -233,15 +234,23 @@ body {
     transform: scale(1.05);
 }
 
-.btn-prev { left: 12px; right: auto; }
-.btn-next { right: 12px; left: auto; }
+.btn-prev { 
+    left: 12px; 
+    right: auto;
+}
 
+.btn-next { 
+    right: 12px; 
+    left: auto;
+}
+
+/* Informações internas do produto */
 .info-produto {
     padding: 12px 4px 4px 4px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    flex-grow: 1;
+    flex-grow: 1; /* Garante que as informações preencham igualmente e alinhem o botão abaixo */
 }
 
 .info-produto h3 {
@@ -250,7 +259,7 @@ body {
     color: var(--cor-texto-claro);
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis; /* Evita quebra de linha em nomes gigantes botando '...' */
 }
 
 .estoque-status {
@@ -268,6 +277,7 @@ body {
     color: var(--cor-erro);
 }
 
+/* Botão de Adicionar ao carrinho */
 .btn-adicionar {
     width: 100%;
     padding: 10px;
@@ -280,7 +290,7 @@ body {
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: auto;
+    margin-top: auto; /* Alinhamento milimétrico na parte inferior do card */
 }
 
 .btn-adicionar:hover {
@@ -289,9 +299,9 @@ body {
 }
 
 /* ==========================================
-   COLUNA LATERAL: TRANSMISSÃO DE SAÍDA (PC)
+   COLUNA LATERAL: TRANSMISSÃO DE SAÍDA (CARRINHO)
    ========================================== */
-.coluna-carrinho h2.titulo-desktop {
+.coluna-carrinho h2 {
     color: var(--cor-principal) !important;
     border-bottom: 2px solid #333333;
     padding-bottom: 10px;
@@ -328,6 +338,7 @@ body {
     font-size: 13px;
 }
 
+/* Itens adicionados dentro do carrinho */
 .item-carrinho-linha {
     background-color: #1A1A1A;
     padding: 10px;
@@ -355,19 +366,7 @@ body {
     color: var(--cor-texto-escuro);
 }
 
-.input-qtd-rapido {
-    width: 60px;
-    padding: 3px;
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    background-color: #111111;
-    color: #FFFFFF;
-    border: 2px solid var(--cor-principal);
-    border-radius: 4px;
-    outline: none;
-}
-
+/* Botão Confirmar Transmissão */
 .btn-confirmar-baixa {
     width: 100%;
     padding: 14px;
@@ -394,9 +393,10 @@ body {
 }
 
 /* ==========================================
-   RECONSTRUÇÃO COMPLETA: INTERFACE NATIVA APP (MOBILE)
+   OTIMIZAÇÃO MOBILE COMPLETA (ANDROID E IOS)
    ========================================== */
 
+/* Notebooks pequenos ou telas intermediárias */
 @media (max-width: 1100px) {
     .grid-produtos {
         grid-template-columns: repeat(2, 1fr);
@@ -404,176 +404,33 @@ body {
     }
 }
 
+/* Smartphones e dispositivos móveis (Alvo principal do sistema) */
 @media (max-width: 850px) {
     body {
-        padding: 10px 10px 90px 10px !important; /* Respiro obrigatório no rodapé */
-        display: block;
+        padding: 10px; /* Mais espaço útil nas laterais das telas mobile */
     }
 
-    /* Oculta sumariamente elementos desnecessários na visualização mobile */
-    .barra-superior, .coluna-carrinho h2.titulo-desktop, .abas-navegacao {
-        display: none !important;
+    .barra-superior {
+        flex-direction: column; /* Empilha logo e nome do operador para não espremer */
+        gap: 10px;
+        padding: 15px;
+        text-align: center;
     }
 
-    /* Destrava o Grid horizontal de PC para fluxo linear empilhado */
     .conteudo-principal {
-        display: block !important;
-        width: 100%;
+        grid-template-columns: 1fr; /* Força o Carrinho a deslizar elegantemente para baixo do Catálogo */
+        gap: 20px;
     }
 
-    #aba-produtos {
-        width: 100%;
-        margin-bottom: 20px;
-    }
-
-    /* BARRA INFERIOR DE ABAS TOTALMENTE FIXA (ESTILO INSTAGRAM) */
-    .barra-inferior-mobile {
-        display: flex !important;
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        height: 65px;
-        background-color: rgba(38, 38, 38, 0.96) !important;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border-top: 1px solid #333333;
-        justify-content: space-around;
-        align-items: center;
-        z-index: 10000 !important; /* Permanece fixo sobrepondo a gaveta */
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .item-nav-mobile {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: #888888;
-        cursor: pointer;
-        flex: 1;
-        height: 100%;
-        transition: color 0.2s ease;
-    }
-
-    .item-nav-mobile.ativa {
-        color: var(--cor-principal);
-    }
-
-    .icone-nav {
-        font-size: 20px;
-        margin-bottom: 2px;
-    }
-
-    .label-nav {
-        font-size: 11px;
-        font-weight: 600;
-        max-width: 90px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* DESIGN PREMIUM DO BOTÃO DE ACESSO CENTRAL DO CARRINHO */
-    .btn-carrinho-central {
-        position: relative;
-        top: -8px; /* Sobe o círculo flutuante */
-        background: #1a1a1a !important;
-        border-radius: 50%;
-        height: 60px;
-        max-width: 60px;
-        border: 1px solid #333333;
-        box-shadow: 0 -4px 12px rgba(0,0,0,0.4);
-    }
-
-    .wrapper-icone-carrinho {
-        position: relative;
-        display: inline-block;
-    }
-
-    .badge-contador {
-        position: absolute;
-        top: -6px;
-        right: -12px;
-        background-color: var(--cor-erro);
-        color: white;
-        font-size: 10px;
-        font-weight: bold;
-        min-width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid #1a1a1a;
-        padding: 2px;
-    }
-
-    /* DESIGN DA GAVETA DE SAÍDA (SLIDE-UP DRAWER) */
-    .coluna-carrinho {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        z-index: 9999 !important; /* Renderiza exatamente abaixo do menu fixo */
-        margin: 0;
-        border-radius: 20px 20px 0 0;
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
-        background-color: #212121;
-        max-height: 75vh;
-        display: flex;
-        flex-direction: column;
-        padding: 15px 20px 80px 20px; /* Padding inferior estendido para não encavalar nos botões */
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        transform: translateY(100%); /* Escondido por padrão na base do display */
-    }
-
-    .coluna-carrinho.aberto {
-        transform: translateY(0) !important; /* Sobe suavemente para exibição */
-    }
-
-    /* Topo interno decorativo da Gaveta Mobile */
-    .gaveta-header-mobile {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .indicador-gesto {
-        width: 40px;
-        height: 4px;
-        background-color: #444444;
-        border-radius: 2px;
-        margin-bottom: 12px;
-    }
-
-    .gaveta-header-mobile h2 {
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--cor-principal);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Área de Rolagem Confortável interna para itens adicionados */
-    #itens-carrinho {
-        overflow-y: auto;
-        flex: 1;
-        max-height: 260px;
-        margin-bottom: 15px;
-    }
-
-    /* Vitrine Mobile Estável: Sempre 2 modelos paralelos por linha */
+    /* Layout do catálogo em celulares: 2 por linha aproveitando excelente visibilidade vertical */
     .grid-produtos {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
     }
 
+    /* Altura balanceada para miniaturas em telas móveis */
     .carrossel {
-        height: 150px !important; /* Altura controlada para não esconder a grade técnica */
+        height: 170px;
     }
 
     .cartao-produto {
@@ -585,32 +442,27 @@ body {
     }
 
     .info-produto h3 {
-        font-size: 13px;
-    }
-
-    .btn-adicionar {
-        font-size: 11px;
-        padding: 8px;
+        font-size: 13px; /* Legibilidade perfeita para telas menores */
     }
 }
 
-/* Telas compactas em modo vertical */
+/* Celulares muito compactos em modo retrato */
 @media (max-width: 440px) {
     .grid-produtos {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr; /* Muda para 1 por linha se o display for extremamente estreito */
     }
     .carrossel {
-        height: 200px !important;
+        height: 230px; /* Amplia a miniatura no card único horizontal */
     }
 }
 
-/* Animações de Transição */
+/* Animações */
 @keyframes surgimentoSuave {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Estilização Completa do Cartão de Login */
+/* Estilização da Tela de Login */
 .bloco-card-login {
     background-color: var(--cor-fundo-card);
     padding: 40px;
@@ -647,67 +499,4 @@ body {
 
 .bloco-card-login input:focus {
     border-color: var(--cor-principal);
-}
-
-/* 1. Esconder a barra no Desktop */
-.barra-inferior-mobile {
-    display: none;
-}
-
-/* 2. Estilização apenas para Mobile */
-@media (max-width: 850px) {
-    .barra-inferior-mobile {
-        display: flex !important;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 65px;
-        background-color: #1a1a1a;
-        border-top: 1px solid #333;
-        z-index: 10001;
-        justify-content: space-around;
-        align-items: center;
-    }
-
-    .item-nav-mobile {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: #888;
-        font-size: 10px;
-        cursor: pointer;
-    }
-
-    .item-nav-mobile.ativa { color: var(--cor-principal); }
-
-    /* O Botão central (Estilo Igreja/Instagram) */
-    .btn-carrinho-central {
-        background: var(--cor-principal);
-        color: #000;
-        width: 55px;
-        height: 55px;
-        border-radius: 50%;
-        margin-top: -30px; /* Faz o ícone subir sobre a linha */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        position: relative;
-    }
-    
-    .badge-contador {
-        position: absolute;
-        top: 0;
-        right: 0;
-        background: red;
-        color: white;
-        border-radius: 50%;
-        width: 18px;
-        height: 18px;
-        font-size: 10px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
 }
