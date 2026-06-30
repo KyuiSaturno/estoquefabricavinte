@@ -94,7 +94,7 @@ async function fazerLogin() {
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
             
-            // EXCLUSIVO MOBILE: Mostra a barra inferior apenas se for um celular
+            // EXCLUSIVO MOBILE: Mostra a barra inferior apenas se for um celular após autenticar
             const navMobile = document.getElementById("nav-mobile-sistema");
             if (navMobile) {
                 navMobile.classList.remove("escondido");
@@ -349,11 +349,11 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
     if (urlImagemCor) {
         const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
         if (carrosselDiv) {
-            const imagens = carrosselDiv.querySelectorAll("img");
-            imagens.forEach((img, index) => {
+            const images = carrosselDiv.querySelectorAll("img");
+            images.forEach((img, index) => {
                 const srcAtual = img.getAttribute('src');
                 if (srcAtual === urlImagemCor || urlImagemCor.includes(srcAtual) || srcAtual.includes(urlImagemCor)) {
-                    imagens.forEach(i => i.classList.remove("ativa"));
+                    images.forEach(i => i.classList.remove("ativa"));
                     img.classList.add("ativa");
                     indicesImagens[idUnicoControle] = index; // Atualiza a seta do carrossel para continuar dali
                 }
@@ -416,6 +416,22 @@ function alterarQuantidadeCarrinho(index, alteracao) {
 function atualizarInterfaceCarrinho() {
     const container = document.getElementById("itens-carrinho");
     const btnConfirmar = document.getElementById("btn-confirmar");
+
+    // =======================================================
+    // NOVO BLINDAGEM DO CONTADOR DINÂMICO (BADGE MOBILE)
+    // =======================================================
+    const totalItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
+    const elementoBadge = document.getElementById("badge-contador");
+
+    if (elementoBadge) {
+        elementoBadge.innerText = totalItens;
+
+        // Efeito de feedback visual para o operador ao injetar uma peça
+        elementoBadge.classList.add("badge-animar");
+        setTimeout(() => {
+            elementoBadge.classList.remove("badge-animar");
+        }, 200);
+    }
 
     if (carrinho.length === 0) {
         container.innerHTML = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
