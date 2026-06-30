@@ -45,7 +45,7 @@ body {
     animation: surgimentoSuave 0.4s ease forwards;
 }
 
-/* Barra Superior (Header) */
+/* Barra Superior (Header) Reorganizada */
 .barra-superior {
     display: flex;
     justify-content: space-between;
@@ -64,7 +64,14 @@ body {
     letter-spacing: 1px;
 }
 
-.usuario-status {
+/* Container de Controle do Usuário e Carrinho no Topo */
+.usuario-status-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#nome-operador {
     background-color: #1A1A1A;
     padding: 8px 16px;
     border-radius: 20px;
@@ -73,39 +80,68 @@ body {
     border: 1px solid #333333;
 }
 
-/* Menu de Abas de Navegação */
-.abas-navegacao {
-    display: flex;
-    gap: 10px;
-    border-bottom: 2px solid #333333;
-    padding-bottom: 2px;
-}
-
-.btn-aba {
-    background-color: transparent;
-    color: #888888;
-    border: none;
-    padding: 10px 20px;
-    font-size: 15px;
+/* Botão de Controle do Carrinho no Topo do PC */
+.btn-carrinho-topo-pc {
+    background-color: #1A1A1A;
+    color: var(--cor-texto-claro);
+    border: 1px solid var(--cor-principal);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s, color 0.2s;
 }
 
-.btn-aba.ativa {
-    color: var(--cor-principal);
-    border-bottom-color: var(--cor-principal);
+.btn-carrinho-topo-pc:hover {
+    background-color: var(--cor-principal);
+    color: var(--cor-texto-escuro);
 }
 
-/* Área de Conteúdo Principal (Split em 2 Colunas para PC) */
+.badge-contador-topo {
+    background-color: var(--cor-erro);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+/* Botão Sair do Topo (Desktop) */
+.btn-sair-desktop {
+    background-color: transparent;
+    color: var(--cor-erro);
+    border: 1px solid var(--cor-erro);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-sair-desktop:hover {
+    background-color: var(--cor-erro);
+    color: var(--cor-texto-claro);
+}
+
+/* Removido as abas antigas redundantes em Desktop */
+.abas-navegacao {
+    display: none !important;
+}
+
+/* Área de Conteúdo Principal (Agora em 1 Coluna Inteira no PC) */
 .conteudo-principal {
-    display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 25px;
-    align-items: start;
+    display: block; /* Remove o grid antigo de 2 colunas */
+    width: 100%;
 }
 
 /* Estilização Geral dos Blocos (Cards) */
@@ -115,6 +151,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     border: 1px solid #333333;
+    width: 100%;
 }
 
 .bloco-card h2 {
@@ -159,10 +196,10 @@ body {
     border-color: var(--cor-principal);
 }
 
-/* Grid Travado para renderizar exatamente 3 produtos lado a lado no PC */
+/* Grid de Produtos Otimizado em Tela Cheia no PC */
 .grid-produtos {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr); /* Aumentado para 4 itens por linha aproveitando o espaço total */
     gap: 20px;
 }
 
@@ -177,7 +214,7 @@ body {
     border: 1px solid #333333;
     transition: transform 0.2s ease, border-color 0.2s ease;
     padding: 12px;
-    height: 100%; /* Mantém o alinhamento de altura idêntico nos cards da mesma linha */
+    height: 100%;
 }
 
 .cartao-produto:hover {
@@ -185,21 +222,20 @@ body {
     border-color: var(--cor-principal);
 }
 
-/* Moldura do Carrossel com tamanho máximo controlado */
+/* Moldura do Carrossel */
 .carrossel {
     position: relative;
     width: 100%;
-    height: 220px; /* Mantém uma altura uniforme e profissional */
+    height: 220px;
     background-color: #111111;
     border-radius: 6px;
     overflow: hidden;
 }
 
-/* Tratamento da Imagem para nunca quebrar ou distorcer */
 .carrossel img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Faz o preenchimento proporcional sem esticar a imagem */
+    object-fit: cover;
     display: none;
 }
 
@@ -207,12 +243,12 @@ body {
     display: block;
 }
 
-/* Botões do Carrossel Ajustados para a Base */
+/* Botões do Carrossel */
 .btn-carrossel {
     position: absolute;
-    top: auto;                 /* Remove centralização vertical antiga */
-    bottom: 12px;              /* Alinha os botões flutuando na base */
-    transform: none;           /* Remove reset de posicionamento */
+    top: auto;
+    bottom: 12px;
+    transform: none;
     background-color: rgba(0, 0, 0, 0.65);
     color: var(--cor-principal);
     border: none;
@@ -250,7 +286,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    flex-grow: 1; /* Garante que as informações preencham igualmente e alinhem o botão abaixo */
+    flex-grow: 1;
 }
 
 .info-produto h3 {
@@ -259,7 +295,7 @@ body {
     color: var(--cor-texto-claro);
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Evita quebra de linha em nomes gigantes botando '...' */
+    text-overflow: ellipsis;
 }
 
 .estoque-status {
@@ -277,7 +313,7 @@ body {
     color: var(--cor-erro);
 }
 
-/* Botão de Adicionar ao carrinho */
+/* Botão de Adicionar */
 .btn-adicionar {
     width: 100%;
     padding: 10px;
@@ -290,7 +326,7 @@ body {
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: auto; /* Alinhamento milimétrico na parte inferior do card */
+    margin-top: auto;
 }
 
 .btn-adicionar:hover {
@@ -299,71 +335,118 @@ body {
 }
 
 /* ==========================================
-   COLUNA LATERAL: TRANSMISSÃO DE SAÍDA (CARRINHO)
+   ESTRUTURA DA GAVETA LATERAL DO CARRINHO (SIDEBAR)
    ========================================== */
-.coluna-carrinho h2 {
+.sidebar-gaveta-carrinho {
+    position: fixed;
+    top: 0;
+    right: -420px; /* Escondido por padrão para fora da tela */
+    width: 400px;
+    height: 100vh;
+    background-color: var(--cor-fundo-card);
+    box-shadow: -5px 0 25px rgba(0,0,0,0.6);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #333333;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transição suave de deslize */
+}
+
+.sidebar-gaveta-carrinho.aberta {
+    right: 0; /* Desliza para dentro da tela */
+}
+
+.sidebar-carrinho-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px;
+    background-color: #1A1A1A;
+    border-bottom: 1px solid #333333;
+}
+
+.sidebar-carrinho-header h2 {
     color: var(--cor-principal) !important;
-    border-bottom: 2px solid #333333;
-    padding-bottom: 10px;
+    margin: 0 !important;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.btn-fechar-sidebar {
+    background: none;
+    border: none;
+    color: var(--cor-texto-claro);
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-fechar-sidebar:hover {
+    color: var(--cor-erro);
+}
+
+.sidebar-carrinho-corpo {
+    flex: 1;
+    padding: 25px;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-carrinho-corpo h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #AAAAAA;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-scroll-itens {
+    flex: 1;
+    overflow-y: auto; /* Rolagem independente interna apenas para os itens */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 5px;
+}
+
+.sidebar-carrinho-footer {
+    padding: 25px;
+    background-color: #1A1A1A;
+    border-top: 1px solid #333333;
 }
 
 .divisor {
     height: 1px;
     background-color: #333333;
-    margin: 15px 0;
-}
-
-.coluna-carrinho h3 {
-    font-size: 14px;
-    text-transform: uppercase;
-    color: #AAAAAA;
-    margin-bottom: 10px;
-    letter-spacing: 0.5px;
-}
-
-#itens-carrinho {
-    max-height: 280px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 15px;
+    margin: 20px 0;
 }
 
 .carrinho-vazio {
     color: #666666;
     font-style: italic;
     text-align: center;
-    padding: 15px 0;
-    font-size: 13px;
+    padding: 30px 0;
+    font-size: 14px;
 }
 
-/* Itens adicionados dentro do carrinho */
-.item-carrinho-linha {
-    background-color: #1A1A1A;
-    padding: 10px;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #333333;
-    font-size: 13px;
+/* Camada Fundo Escuro */
+.overlay-escuro {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 9999;
+    display: none;
+    backdrop-filter: blur(2px); /* Efeito desfocado leve no fundo */
 }
 
-.item-carrinho-linha button {
-    background-color: #333333;
-    color: white;
-    border: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.item-carrinho-linha button:hover {
-    background-color: var(--cor-principal);
-    color: var(--cor-texto-escuro);
+.overlay-escuro.visivel {
+    display: block;
 }
 
 /* Botão Confirmar Transmissão */
@@ -393,42 +476,52 @@ body {
 }
 
 /* ==========================================
-   OTIMIZAÇÃO MOBILE COMPLETA (ANDROID E IOS)
+   OTIMIZAÇÃO RESPONSIVA E MOBILE
    ========================================== */
 
-/* Notebooks pequenos ou telas intermediárias */
+/* Telas de computadores menores ou Notebooks */
 @media (max-width: 1100px) {
     .grid-produtos {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 15px;
     }
 }
 
-/* Smartphones e dispositivos móveis (Alvo principal do sistema) */
+/* Smartphones e tablets compactos */
 @media (max-width: 850px) {
     body {
-        padding: 10px; /* Mais espaço útil nas laterais das telas mobile */
+        padding: 10px;
     }
 
     .barra-superior {
-        flex-direction: column; /* Empilha logo e nome do operador para não espremer */
-        gap: 10px;
+        flex-direction: column;
+        gap: 12px;
         padding: 15px;
         text-align: center;
     }
 
-    .conteudo-principal {
-        grid-template-columns: 1fr; /* Força o Carrinho a deslizar elegantemente para baixo do Catálogo */
-        gap: 20px;
+    .usuario-status-container {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
     }
 
-    /* Layout do catálogo em celulares: 2 por linha aproveitando excelente visibilidade vertical */
+    #nome-operador {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Esconde os botões de controle Desktop no Mobile */
+    .btn-carrinho-topo-pc, .btn-sair-desktop {
+        display: none !important;
+    }
+
+    /* O catálogo volta a ocupar 2 itens por linha no mobile com visual perfeito */
     .grid-produtos {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
 
-    /* Altura balanceada para miniaturas em telas móveis */
     .carrossel {
         height: 170px;
     }
@@ -442,17 +535,25 @@ body {
     }
 
     .info-produto h3 {
-        font-size: 13px; /* Legibilidade perfeita para telas menores */
+        font-size: 13px;
+    }
+    
+    /* Força desativação da sidebar/gaveta física em telas mobile para usar a aba mobile nativa */
+    .sidebar-gaveta-carrinho {
+        display: none !important;
+    }
+    .overlay-escuro {
+        display: none !important;
     }
 }
 
-/* Celulares muito compactos em modo retrato */
+/* Celulares extremamente compactos */
 @media (max-width: 440px) {
     .grid-produtos {
-        grid-template-columns: 1fr; /* Muda para 1 por linha se o display for extremamente estreito */
+        grid-template-columns: 1fr;
     }
     .carrossel {
-        height: 230px; /* Amplia a miniatura no card único horizontal */
+        height: 230px;
     }
 }
 
@@ -502,7 +603,7 @@ body {
 }
 
 /* =======================================================
-   BARRA DE NAVEGAÇÃO INFERIOR COM VARIÁVEIS DO ESTOQUE
+   BARRA DE NAVEGAÇÃO INFERIOR MOBILE (MANTIDA INTEGRALMENTE)
    ======================================================= */
 .bottom-nav {
     display: none;
@@ -512,10 +613,6 @@ body {
     .conteudo-principal {
         display: block !important;
     }
-    
-    .abas-navegacao {
-        display: none !important;
-    }
 
     #aba-produtos, #aba-carrinho {
         display: none;
@@ -523,6 +620,21 @@ body {
 
     #aba-produtos.exibir-mobile, #aba-carrinho.exibir-mobile {
         display: block !important;
+    }
+    
+    /* Configura o container do carrinho mobile para se comportar de forma padrão em tela cheia */
+    #aba-carrinho.exibir-mobile {
+        position: static;
+        width: 100%;
+        height: auto;
+        box-shadow: none;
+        border: 1px solid #333333;
+        display: block !important;
+    }
+    
+    #itens-carrinho {
+        max-height: none;
+        overflow-y: visible;
     }
 
     .bottom-nav {
@@ -532,11 +644,10 @@ body {
         left: 0;
         right: 0;
         height: 65px;
-        /* ADAPTAÇÃO VISUAL: Usa o fundo padrão do seu painel de estoque */
         background: var(--cor-fundo-card, #262626); 
-        border-top: 1px solid var(--cor-borda, rgba(0, 0, 0, 0.1));
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
         box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
-        z-index: 9999;
+        z-index: 99999;
         justify-content: space-around;
         align-items: center;
         padding: 0 10px;
@@ -548,7 +659,6 @@ body {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        /* Texto inativo em cinza neutro */
         color: var(--cor-texto-claro, #FFFFFF); 
         text-decoration: none;
         font-size: 0.75rem;
@@ -569,18 +679,16 @@ body {
         transition: transform 0.2s;
     }
 
-    /* ADAPTAÇÃO VISUAL: Item ativo assume a cor principal da Jeri 20 */
     .bottom-nav-item.ativa {
         opacity: 1;
         color: var(--cor-principal, #4f46e5); 
     }
 
-    /* ESTILIZAÇÃO DA BOLINHA DE RETIRADA (BADGE) */
     .badge-contador {
         position: absolute;
         top: 2px;
         right: 22%;
-        background-color: var(--cor-principal, #4f46e5);
+        background-color: var(--cor-principal);
         color: #ffffff;
         font-size: 11px;
         font-weight: bold;
@@ -596,7 +704,6 @@ body {
         transition: transform 0.2s ease;
     }
 
-    /* Efeito de pulso rápido quando o número muda */
     .badge-animar {
         transform: scale(1.3);
     }
