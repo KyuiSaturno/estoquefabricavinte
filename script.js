@@ -331,6 +331,7 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
 function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
     const produto = dadosProdutosFiltrados.find(p => p.id === produtoId);
+    if (!produto) return;
     
     const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
     const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
@@ -354,7 +355,8 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
             quantidade: 1,
             maximo: estoqueMaximo,
             promocional: usarEstoquePromo,
-            categoriaOrigem: document.getElementById("filtro-categoria").value
+            // CORREÇÃO: Pega a categoria direto do produto enviado pela planilha, evitando ler o select do HTML
+            categoriaOrigem: produto.categoria || document.getElementById("filtro-categoria").value
         });
     }
     atualizarInterfaceCarrinho();
@@ -424,7 +426,7 @@ async function confirmarBaixa() {
                 tipo: item.categoriaOrigem,
                 usuario: usuarioLogado,
                 localizacao: localizacao,
-                isPromo: item.promocional, // Passa o estado booleano para a nova regra da API do codigo.gs
+                isPromo: item.promocional, 
                 carrinho: [item]
             }));
 
@@ -439,6 +441,8 @@ async function confirmarBaixa() {
         alert("Baixa processada com sucesso!");
         carrinho = [];
         atualizarInterfaceCarrinho();
+        
+        // Atualiza a lista da categoria atual de forma segura
         filtrarPorCategoria();
 
     } catch (erro) {
