@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Gatilho para o botão de confirmação de Baixa
     const btnConfirmar = document.getElementById("btn-confirmar");
     if (btnConfirmar) {
-        btnConfirmar.addEventListener("click", confirmarBaixa);
+        btnConfirmar.addEventListener("click",骗confirmarBaixa);
     }
 
     // Gatilho para o botão Sair
@@ -104,6 +104,103 @@ function configurarEstadoInicialVisual() {
     const telaLogin = document.getElementById("tela-login");
     const painelPrincipal = document.getElementById("painel-principal");
     const navMobile = document.getElementById("nav-mobile-sistema");
+
+    // Injeta estilização limpa e moderna para o painel de Login sem quebrar o HTML
+    if (!document.getElementById("estilo-login-custom")) {
+        const estilo = document.createElement("style");
+        estilo.id = "estilo-login-custom";
+        estilo.innerHTML = `
+            #tela-login {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+                font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            #tela-login .container, #tela-login .login-box, .box-login, #tela-login > div:not(.escondido) {
+                background: #ffffff;
+                padding: 40px 30px;
+                border-radius: 16px;
+                box-shadow: 0 10px 25px rgba(160, 175, 195, 0.15);
+                width: 100%;
+                max-width: 380px;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            #tela-login h2, #tela-login h1 {
+                color: #2d3748;
+                font-size: 24px;
+                margin-top: 0;
+                margin-bottom: 24px;
+                font-weight: 600;
+                letter-spacing: -0.5px;
+            }
+            #tela-login .form-grupo, #tela-login div {
+                margin-bottom: 16px;
+                text-align: left;
+            }
+            #tela-login label {
+                display: block;
+                color: #4a5568;
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: 6px;
+            }
+            #tela-login input[type="text"], #tela-login input[type="password"] {
+                width: 100%;
+                padding: 12px 14px;
+                border: 1.5px solid #e2e8f0;
+                border-radius: 8px;
+                font-size: 15px;
+                color: #2d3748;
+                background-color: #f8fafc;
+                box-sizing: border-box;
+                transition: all 0.2s ease;
+            }
+            #tela-login input:focus {
+                outline: none;
+                border-color: #4f46e5;
+                background-color: #ffffff;
+                box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            }
+            #tela-login button {
+                width: 100%;
+                padding: 14px;
+                background: linear-gradient(90deg, #4f46e5 0%, #4338ca 100%);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+                transition: all 0.2s ease;
+                margin-top: 8px;
+            }
+            #tela-login button:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 15px rgba(79, 70, 229, 0.25);
+            }
+            #tela-login button:disabled {
+                background: #a5b4fc;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+            #erro-login {
+                color: #e53e3e;
+                font-size: 13px;
+                margin-top: 12px;
+                text-align: center;
+                font-weight: 500;
+                min-height: 18px;
+            }
+        `;
+        document.head.appendChild(estilo);
+    }
 
     if (telaLogin) {
         telaLogin.classList.remove("escondido");
@@ -451,6 +548,9 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
 
         const tagPromoHTML = usarEstoquePromo ? `<div style="position: absolute; top: 10px; left: 10px; background-color: var(--cor-erro); color: white; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">Promoção</div>` : '';
 
+        // ALTERAÇÃO: Remove o caractere '#' do nome na hora de renderizar os cartões na tela
+        const nomeFormatado = produto.nome.replace("#", "").trim();
+
         const cartao = document.createElement("div");
         cartao.className = "cartao-produto";
         cartao.innerHTML = `
@@ -460,7 +560,7 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
                 ${botoesCarrossel}
             </div>
             <div class="info-produto">
-                <h3>${produto.nome}</h3>
+                <h3>${nomeFormatado}</h3>
                 <div class="seletor-grupo">
                     <label>Selecione a Cor / Tamanho:</label>
                     <select id="cor-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
@@ -562,6 +662,9 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
 
     const itemExistente = carrinho.find(item => String(item.id) === String(produtoId) && item.corSelecionada === corSelecionada && item.promocional === usarEstoquePromo);
 
+    // ALTERAÇÃO: Remove o caractere '#' do nome para salvar de forma limpa no carrinho também
+    const nomeLimpo = produto.nome.replace("#", "").trim();
+
     if (itemExistente) {
         if (itemExistente.quantidade < estoqueMaximo) {
             itemExistente.quantidade++;
@@ -570,12 +673,11 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
             return;
         }
     } else {
-        // CORREÇÃO: Garante uma categoria válida para evitar travar o fluxo em outras abas
         const categoriaAtiva = produto.categoria || document.getElementById("filtro-categoria").value;
 
         carrinho.push({
             id: produtoId,
-            nome: produto.nome + (usarEstoquePromo ? " (PROMO)" : ""),
+            nome: nomeLimpo + (usarEstoquePromo ? " (PROMO)" : ""),
             corSelecionada: corSelecionada,
             quantidade: 1,
             maximo: estoqueMaximo,
