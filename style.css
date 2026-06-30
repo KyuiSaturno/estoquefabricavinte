@@ -533,7 +533,7 @@ body {
         right: 0;
         height: 65px;
         /* ADAPTAÇÃO VISUAL: Usa o fundo padrão do seu painel de estoque */
-        background: var(--fundo-card, #ffffff); 
+        background: var(--cor-fundo-card: #262626); 
         border-top: 1px solid var(--cor-borda, rgba(0, 0, 0, 0.1));
         box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
         z-index: 9999;
@@ -549,7 +549,7 @@ body {
         align-items: center;
         justify-content: center;
         /* Texto inativo em cinza neutro */
-        color: var(--cor-texto-suave, #64748b); 
+        color: var(--cor-texto-claro: #FFFFFF); 
         text-decoration: none;
         font-size: 0.75rem;
         font-weight: 600;
