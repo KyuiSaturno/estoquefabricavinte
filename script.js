@@ -7,6 +7,12 @@ let dadosProdutosFiltrados = [];
 let carrinho = [];      
 let indicesImagens = {}; 
 
+// EXECUTA ASSIM QUE A PÁGINA CARREGA
+document.addEventListener("DOMContentLoaded", () => {
+    // Garante que o carrinho comece fechado no carregamento
+    alternarSidebarCarrinho(false);
+});
+
 // ==========================================
 // CONTROLADOR DE NAVEGAÇÃO E SIDEBAR (GAVETA)
 // ==========================================
@@ -18,8 +24,8 @@ function alternarAbaSistemas(abaDestino) {
 
     // EXECUÇÃO EM MODO CELULAR / MOBILE (Telas menores ou iguais a 768px)
     if (window.innerWidth <= 768) {
-        // Garante que a gaveta desktop fique fechada no mobile se a tela for redimensionada
-        fecharCarrinhoGaveta();
+        // Garante que os efeitos visuais de desktop fiquem desativados no mobile
+        alternarSidebarCarrinho(false);
 
         if (abaDestino === 'produtos') {
             if (abaProdutos) abaProdutos.classList.add("exibir-mobile");
@@ -37,32 +43,28 @@ function alternarAbaSistemas(abaDestino) {
     } 
 }
 
-// Funções de Controle Exclusivas da Gaveta Lateral (Desktop)
-function abrirCarrinhoGaveta() {
-    if (window.innerWidth > 768) {
-        const gaveta = document.getElementById("gaveta-carrinho-desktop");
-        const overlay = document.getElementById("overlay-background");
-        if (gaveta) gaveta.classList.add("aberta");
-        if (overlay) overlay.classList.add("visivel");
+// Função unificada exigida pelo HTML para controlar abertura, fechamento e overlay
+function alternarSidebarCarrinho(abrir) {
+    const sidebar = document.getElementById("aba-carrinho");
+    const overlay = document.getElementById("overlay-carrinho");
+
+    // Se não for passado nenhum parâmetro (ex: clique alternado), verifica o estado atual
+    if (abrir === undefined && sidebar) {
+        abrir = !sidebar.classList.contains("aberta");
     }
-}
 
-function fecharCarrinhoGaveta() {
-    const gaveta = document.getElementById("gaveta-carrinho-desktop");
-    const overlay = document.getElementById("overlay-background");
-    if (gaveta) gaveta.classList.remove("aberta");
-    if (overlay) overlay.classList.remove("visivel");
-}
-
-// Função de transição exigida pelo botão do topo do PC
-function alternarSidebarCarrinho() {
-    const gaveta = document.getElementById("gaveta-carrinho-desktop");
-    if (gaveta) {
-        if (gaveta.classList.contains("aberta")) {
-            fecharCarrinhoGaveta();
+    if (window.innerWidth > 768) {
+        if (abrir) {
+            if (sidebar) sidebar.classList.add("aberta");
+            if (overlay) overlay.classList.add("visivel");
         } else {
-            abrirCarrinhoGaveta();
+            if (sidebar) sidebar.classList.remove("aberta");
+            if (overlay) overlay.classList.remove("visivel");
         }
+    } else {
+        // Fallback preventivo para evitar que trave classes residuais no mobile
+        if (sidebar) sidebar.classList.remove("aberta");
+        if (overlay) overlay.classList.remove("visivel");
     }
 }
 
@@ -84,7 +86,7 @@ function fazerLogout() {
     const navMobile = document.getElementById("nav-mobile-sistema");
     if (navMobile) navMobile.classList.add("escondido");
     
-    fecharCarrinhoGaveta();
+    alternarSidebarCarrinho(false);
     atualizarInterfaceCarrinho();
     
     document.getElementById("tela-login").classList.remove("escondido");
@@ -131,20 +133,24 @@ async function fazerLogin() {
             usuarioLogado = usuarioInput;
             document.getElementById("nome-operador").innerText = `Usuário: ${usuarioLogado}`;
             
-            // Oculta a tela de login e revela o painel do PC
             document.getElementById("tela-login").classList.add("escondido");
             document.getElementById("painel-principal").classList.remove("escondido");
             
-            // EXCLUSIVO MOBILE: Mostra a barra inferior apenas se for um celular após autenticar
             const navMobile = document.getElementById("nav-mobile-sistema");
             if (navMobile) {
                 navMobile.classList.remove("escondido");
             }
             
-            // Inicializa mostrando o catálogo por padrão
-            alternarAbaSistemas('produtos');
+            if (window.innerWidth > 768) {
+                const abaProdutos = document.getElementById("aba-produtos");
+                const abaCarrinho = document.getElementById("aba-carrinho");
+                if (abaProdutos) abaProdutos.classList.remove("exibir-mobile");
+                if (abaCarrinho) abaCarrinho.classList.remove("exibir-mobile");
+                alternarSidebarCarrinho(false);
+            } else {
+                alternarAbaSistemas('produtos');
+            }
             
-            // Carrega a listagem das abas/categorias vindas da Planilha
             carregarCategoriasDinamicas();
         } else {
             erroLogin.innerText = resultado.erro || "Usuário ou senha incorretos.";
@@ -394,7 +400,6 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
     }
 }
 
-// Seta de controle manual das fotos do carrossel
 function mudarFoto(idUnicoControle, totalFotos, direcao) {
     indicesImagens[idUnicoControle] = (indicesImagens[idUnicoControle] + direcao + totalFotos) % totalFotos;
     const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
@@ -455,18 +460,15 @@ function alterarQuantidadeCarrinho(index, alteracao) {
 }
 
 function atualizarInterfaceCarrinho() {
-    // Sincroniza a inserção de elementos nos dois containers simultaneamente (Fixo Mobile vs Gaveta PC)
+    // Alvo único real do seu index.html (<div id="itens-carrinho">)
     const containerMobile = document.getElementById("itens-carrinho");
-    const containerPC = document.getElementById("itens-carrinho-pc");
-    
     const btnConfirmarMobile = document.getElementById("btn-confirmar");
-    const btnConfirmarPC = document.getElementById("btn-confirmar-pc");
 
     const totalItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
     
-    // Atualiza os contadores das Badges (Tanto no Topo do PC quanto na barra inferior Mobile)
-    const elementoBadgeMb = document.getElementById("badge-contador");
-    const elementoBadgePc = document.getElementById("badge-contador-pc");
+    // Vincula perfeitamente com os IDs reais do seu HTML
+    const elementoBadgeMb = document.getElementById("badge-contador");        // Badge inferior Mobile
+    const elementoBadgePc = document.getElementById("badge-contador-topo");  // Badge superior PC
 
     if (elementoBadgeMb) {
         elementoBadgeMb.innerText = totalItens;
@@ -477,23 +479,16 @@ function atualizarInterfaceCarrinho() {
         elementoBadgePc.innerText = totalItens;
     }
 
-    // Estrutura HTML para renderizar quando o carrinho estiver zerado
     const htmlVazio = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
 
     if (carrinho.length === 0) {
         if (containerMobile) containerMobile.innerHTML = htmlVazio;
-        if (containerPC) containerPC.innerHTML = htmlVazio;
-        
         if (btnConfirmarMobile) btnConfirmarMobile.disabled = true;
-        if (btnConfirmarPC) btnConfirmarPC.disabled = true;
         return;
     }
 
-    // Renderização dos Itens nos dois blocos de contêineres estruturais
-    const injetarItensControle = (containerAlvo) => {
-        if (!containerAlvo) return;
-        containerAlvo.innerHTML = "";
-        
+    if (containerMobile) {
+        containerMobile.innerHTML = "";
         carrinho.forEach((item, index) => {
             const linha = document.createElement("div");
             linha.className = "item-carrinho-linha";
@@ -509,32 +504,23 @@ function atualizarInterfaceCarrinho() {
                 </div>
                 <button style="background-color: #ff4d4d; color: white;" onclick="alterarQuantidadeCarrinho(${index}, -${item.quantidade})">Excluir</button>
             `;
-            containerAlvo.appendChild(linha);
+            containerMobile.appendChild(linha);
         });
-    };
-
-    injetarItensControle(containerMobile);
-    injetarItensControle(containerPC);
+    }
 
     if (btnConfirmarMobile) btnConfirmarMobile.disabled = false;
-    if (btnConfirmarPC) btnConfirmarPC.disabled = false;
 }
 
-async function confirmarBaixa(idLocalizacaoInput, idBtnProcesso) {
-    const localizacao = document.getElementById(idLocalizacaoInput).value;
-    const btnConfirmar = document.getElementById(idBtnProcesso);
+async function confirmarBaixa() {
+    // Como seu HTML possui apenas uma tag select (#localizacao) e botão (#btn-confirmar), removemos a exigência de parâmetros estritos
+    const localizacao = document.getElementById("localizacao").value;
+    const btnConfirmar = document.getElementById("btn-confirmar");
 
     if (carrinho.length === 0) return;
     if (!confirm(`Confirmar a retirada destes itens para: ${localizacao}?`)) return;
 
-    const textoOriginalBtn = btnConfirmar.innerText;
     btnConfirmar.innerText = "Processando...";
-    
-    // Trava ambos os botões para evitar cliques duplos em concorrência
-    const btnMobile = document.getElementById("btn-confirmar");
-    const btnPC = document.getElementById("btn-confirmar-pc");
-    if (btnMobile) btnMobile.disabled = true;
-    if (btnPC) btnPC.disabled = true;
+    btnConfirmar.disabled = true;
 
     try {
         for (let item of carrinho) {
@@ -558,29 +544,17 @@ async function confirmarBaixa(idLocalizacaoInput, idBtnProcesso) {
 
         alert("Baixa processada com sucesso!");
         carrinho = [];
-        fecharCarrinhoGaveta();
+        alternarSidebarCarrinho(false);
         atualizarInterfaceCarrinho();
         
-        // Sincroniza e recarrega os novos estoques direto do servidor
         filtrarPorCategoria();
 
     } catch (erro) {
         console.error("Erro na baixa:", erro);
         alert("Erro crítico ao sincronizar os dados de saída.");
-        if (btnMobile) { btnMobile.innerText = "Confirmar"; btnMobile.disabled = false; }
-        if (btnPC) { btnPC.disabled = false; }
-        btnConfirmar.innerText = textoOriginalBtn;
+        if (btnConfirmar) {
+            btnConfirmar.innerText = "Confirmar";
+            btnConfirmar.disabled = false;
+        }
     }
 }
-
-// EXECUTA ASSIM QUE A PÁGINA CARREGA
-document.addEventListener("DOMContentLoaded", () => {
-    // Garante que o carrinho comece fechado
-    fecharCarrinhoGaveta();
-    
-    // Adiciona o evento de fechar ao clicar no fundo escuro (Overlay)
-    const overlay = document.getElementById("overlay-background");
-    if (overlay) {
-        overlay.addEventListener("click", fecharCarrinhoGaveta);
-    }
-});
