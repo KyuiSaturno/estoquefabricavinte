@@ -296,7 +296,10 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
         btnAdd.disabled = false;
     }
 
-    const urlImagemCor = produto.imagemPorCor ? produto.imagemPorCor[corSelecionada] : "";
+    // CORREÇÃO AQUI: Define dinamicamente qual objeto de imagem ler (promo ou padrão)
+    const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
+    const urlImagemCor = mapaImagensAlvo ? mapaImagensAlvo[corSelecionada] : "";
+    
     if (urlImagemCor) {
         const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
         if (carrosselDiv) {
