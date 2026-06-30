@@ -190,12 +190,10 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
             indicesImagens[idUnicoControle] = 0;
         }
 
-        // Determina qual mapa de estoque ler
         const mapaEstoqueAlvo = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
         if (!mapaEstoqueAlvo) return;
 
         const coresTotais = Object.keys(mapaEstoqueAlvo);
-        // Se estiver no modo promo, filtra no select para exibir apenas as cores que têm estoque promocional de fato
         const coresDisponiveis = usarEstoquePromo ? coresTotais.filter(cor => (mapaEstoqueAlvo[cor] || 0) > 0) : coresTotais;
         
         if (coresDisponiveis.length === 0) return;
@@ -203,10 +201,26 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         const primeiraCor = coresDisponiveis[0] || "Padrão";
         const estoqueInicial = mapaEstoqueAlvo[primeiraCor] || 0;
 
+        // Identifica a imagem correta para a cor inicial selecionada
+        const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
+        const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
+
+        // Define qual índice numérico do carrossel corresponde a essa cor inicial
+        let indiceInicialEncontrado = 0;
+        if (urlImagemInicial && produto.imagens) {
+            const idx = produto.imagens.findIndex(url => url === urlImagemInicial || urlImagemInicial.includes(url) || url.includes(urlImagemInicial));
+            if (idx !== -1) {
+                indiceInicialEncontrado = idx;
+                indicesImagens[idUnicoControle] = idx; // Sincroniza o estado global do carrossel
+            }
+        }
+
         let imagensHTML = "";
         if (produto.imagens && produto.imagens.length > 0) {
             produto.imagens.forEach((url, index) => {
-                imagensHTML += `<img src="${url}" class="${index === 0 ? 'ativa' : ''}" data-index="${index}" alt="${produto.nome}">`;
+                // Deixa ativa apenas a imagem que bate com o índice da cor inicial
+                const classeAtiva = (index === indiceInicialEncontrado) ? 'ativa' : '';
+                imagensHTML += `<img src="${url}" class="${classeAtiva}" data-index="${index}" alt="${produto.nome}">`;
             });
         } else {
             imagensHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
@@ -225,7 +239,6 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
             coresOpcoes += `<option value="${cor}">${cor}</option>`;
         });
 
-        // Adiciona um selo visual discreto de "PROMO" no topo do carrossel se a caixinha estiver ativa
         const tagPromoHTML = usarEstoquePromo ? `<div style="position: absolute; top: 10px; left: 10px; background-color: var(--cor-erro); color: white; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">Promoção</div>` : '';
 
         const cartao = document.createElement("div");
@@ -253,36 +266,63 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
             </button>
         `;
         listaDiv.appendChild(cartao);
-
-        // SINCRONIZAÇÃO INICIAL INDEPENDENTE (Buscando direto do objeto 'produto' local)
-        const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
-        const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
-        
-        if (urlImagemInicial) {
-            const carrosselDiv = cartao.querySelector(`#carrossel-${idUnicoControle}`);
-            if (carrosselDiv) {
-                const imagens = carrosselDiv.querySelectorAll("img");
-                let imagemEncontrada = false;
-
-                imagens.forEach((img, index) => {
-                    const srcAtual = img.getAttribute('src');
-                    if (srcAtual === urlImagemInicial || urlImagemInicial.includes(srcAtual) || srcAtual.includes(urlImagemInicial)) {
-                        imagens.forEach(i => i.classList.remove("ativa"));
-                        img.classList.add("ativa");
-                        indicesImagens[idUnicoControle] = index;
-                        imagemEncontrada = true;
-                    }
-                });
-
-                // Se falhar na checagem estrita por texto longo da URL, força o índice 0 como padrão de segurança
-                if (!imagemEncontrada && imagens.length > 0) {
-                    imagens.forEach(i => i.classList.remove("ativa"));
-                    imagens[0].classList.add("ativa");
-                    indicesImagens[idUnicoControle] = 0;
-                }
-            }
-        }
     });
+}
+
+function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
+    const idUnicoControle = `${prefixoContexto}-${produtoId}`;
+    
+    // CORREÇÃO DE SEGURANÇA: Procura o produto na lista global convertendo IDs para string para evitar erros de tipo numérico/texto
+    const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
+    if (!produto) return;
+    
+    const seletorCor = document.getElementById(`cor-${idUnicoControle}`);
+    if (!seletorCor) return;
+    const corSelecionada = seletorCor.value;
+    
+    const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
+    const qtdDisponivel = mapaEstoque[corSelecionada] || 0;
+
+    const statusP = document.getElementById(`status-${idUnicoControle}`);
+    const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
+
+    if (statusP) {
+        statusP.querySelector("span").innerText = qtdDisponivel;
+        if (qtdDisponivel === 0) {
+            statusP.classList.add("sem-estoque");
+        } else {
+            statusP.classList.remove("sem-estoque");
+        }
+    }
+    
+    if (btnAdd) {
+        if (qtdDisponivel === 0) {
+            btnAdd.innerText = "Esgotado";
+            btnAdd.disabled = true;
+        } else {
+            btnAdd.innerText = "Selecionar Peça";
+            btnAdd.disabled = false;
+        }
+    }
+
+    // ALTERAÇÃO DA IMAGEM: Executa a troca de imagem baseada na cor selecionada no clique/change
+    const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
+    const urlImagemCor = mapaImagensAlvo ? mapaImagensAlvo[corSelecionada] : "";
+    
+    if (urlImagemCor) {
+        const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
+        if (carrosselDiv) {
+            const imagens = carrosselDiv.querySelectorAll("img");
+            imagens.forEach((img, index) => {
+                const srcAtual = img.getAttribute('src');
+                if (srcAtual === urlImagemCor || urlImagemCor.includes(srcAtual) || srcAtual.includes(urlImagemCor)) {
+                    imagens.forEach(i => i.classList.remove("ativa"));
+                    img.classList.add("ativa");
+                    indicesImagens[idUnicoControle] = index; // Atualiza a seta do carrossel para continuar dali
+                }
+            });
+        }
+    }
 }
 
 // ==========================================
