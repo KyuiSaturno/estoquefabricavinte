@@ -11,6 +11,75 @@ let indicesImagens = {};
 document.addEventListener("DOMContentLoaded", () => {
     // Garante que o carrinho comece fechado no carregamento
     alternarSidebarCarrinho(false);
+
+    // Ouvintes de clique para abrir/fechar a Sidebar no PC
+    const btnCarrinhoTopo = document.getElementById("btn-carrinho-topo");
+    if (btnCarrinhoTopo) {
+        btnCarrinhoTopo.addEventListener("click", () => {
+            if (window.innerWidth > 768) {
+                alternarSidebarCarrinho(true);
+            } else {
+                alternarAbaSistemas('carrinho');
+            }
+        });
+    }
+
+    const btnFecharCarrinho = document.getElementById("btn-fechar-carrinho");
+    if (btnFecharCarrinho) {
+        btnFecharCarrinho.addEventListener("click", () => alternarSidebarCarrinho(false));
+    }
+
+    const overlayCarrinho = document.getElementById("overlay-carrinho");
+    if (overlayCarrinho) {
+        overlayCarrinho.addEventListener("click", () => alternarSidebarCarrinho(false));
+    }
+
+    // Ouvintes de clique para a navegação inferior (Mobile)
+    const btnNavProdutos = document.getElementById("btn-nav-produtos");
+    if (btnNavProdutos) {
+        btnNavProdutos.addEventListener("click", () => alternarAbaSistemas('produtos'));
+    }
+
+    const btnNavCarrinho = document.getElementById("btn-nav-carrinho");
+    if (btnNavCarrinho) {
+        btnNavCarrinho.addEventListener("click", () => alternarAbaSistemas('carrinho'));
+    }
+
+    // Gatilho para monitorar mudanças no seletor de Categoria
+    const filtroCategoria = document.getElementById("filtro-categoria");
+    if (filtroCategoria) {
+        filtroCategoria.addEventListener("change", filtrarPorCategoria);
+    }
+
+    // Gatilho para o Checkbox Promocional
+    const filtroPromo = document.getElementById("filtro-promocional");
+    if (filtroPromo) {
+        filtroPromo.addEventListener("change", aplicarFiltroVisual);
+    }
+
+    // Gatilho para o botão de confirmação de Baixa
+    const btnConfirmar = document.getElementById("btn-confirmar");
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener("click", confirmarBaixa);
+    }
+
+    // Gatilho para o botão Sair
+    const btnSair = document.getElementById("btn-sair");
+    if (btnSair) {
+        btnSair.addEventListener("click", fazerLogout);
+    }
+
+    // Ouvinte preventivo para redimensionamento de janela dinâmico
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+            const abaProdutos = document.getElementById("aba-produtos");
+            const abaCarrinho = document.getElementById("aba-carrinho");
+            if (abaProdutos) abaProdutos.classList.remove("exibir-mobile");
+            if (abaCarrinho) abaCarrinho.classList.remove("exibir-mobile");
+        } else {
+            alternarSidebarCarrinho(false);
+        }
+    });
 });
 
 // ==========================================
@@ -43,12 +112,11 @@ function alternarAbaSistemas(abaDestino) {
     } 
 }
 
-// Função unificada exigida pelo HTML para controlar abertura, fechamento e overlay
+// Função unificada para controlar abertura, fechamento e overlay no desktop
 function alternarSidebarCarrinho(abrir) {
     const sidebar = document.getElementById("aba-carrinho");
     const overlay = document.getElementById("overlay-carrinho");
 
-    // Se não for passado nenhum parâmetro (ex: clique alternado), verifica o estado atual
     if (abrir === undefined && sidebar) {
         abrir = !sidebar.classList.contains("aberta");
     }
@@ -75,24 +143,32 @@ function fazerLogout() {
     dadosProdutosFiltrados = [];
     indicesImagens = {};
     
-    // Limpa campos visuais
-    document.getElementById("usuario").value = "";
-    document.getElementById("senha").value = "";
+    // Limpa campos visuais de formulários se existirem
+    const usuarioField = document.getElementById("usuario");
+    const senhaField = document.getElementById("senha");
+    if (usuarioField) usuarioField.value = "";
+    if (senhaField) senhaField.value = "";
+    
     document.getElementById("filtro-categoria").innerHTML = '<option value="">-- Escolha uma Categoria --</option>';
-    document.getElementById("lista-produtos-filtrados").innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
+    document.getElementById("grid-produtos").innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
     
     // Reseta visibilidade das telas
     document.getElementById("painel-principal").classList.add("escondido");
+    
     const navMobile = document.getElementById("nav-mobile-sistema");
     if (navMobile) navMobile.classList.add("escondido");
     
+    const telaLogin = document.getElementById("tela-login");
+    if (telaLogin) telaLogin.classList.remove("escondido");
+    
+    const btnLogin = document.getElementById("btn-login");
+    if (btnLogin) {
+        btnLogin.innerText = "Entrar";
+        btnLogin.disabled = false;
+    }
+    
     alternarSidebarCarrinho(false);
     atualizarInterfaceCarrinho();
-    
-    document.getElementById("tela-login").classList.remove("escondido");
-    const btnLogin = document.getElementById("btn-login");
-    btnLogin.innerText = "Entrar";
-    btnLogin.disabled = false;
 }
 
 // ==========================================
@@ -105,13 +181,13 @@ async function fazerLogin() {
     const btnLogin = document.getElementById("btn-login");
 
     if (!usuarioInput || !senhaInput) {
-        erroLogin.innerText = "Preencha todos os campos.";
+        if (erroLogin) erroLogin.innerText = "Preencha todos os campos.";
         return;
     }
 
     btnLogin.innerText = "Verificando...";
     btnLogin.disabled = true;
-    erroLogin.innerText = "";
+    if (erroLogin) erroLogin.innerText = "";
 
     try {
         const params = new URLSearchParams();
@@ -153,13 +229,13 @@ async function fazerLogin() {
             
             carregarCategoriasDinamicas();
         } else {
-            erroLogin.innerText = resultado.erro || "Usuário ou senha incorretos.";
+            if (erroLogin) erroLogin.innerText = resultado.erro || "Usuário ou senha incorretos.";
             btnLogin.innerText = "Entrar";
             btnLogin.disabled = false;
         }
     } catch (erro) {
         console.error("Erro no login:", erro);
-        erroLogin.innerText = "Erro ao conectar com o servidor.";
+        if (erroLogin) erroLogin.innerText = "Erro ao conectar com o servidor.";
         btnLogin.innerText = "Entrar";
         btnLogin.disabled = false;
     }
@@ -204,7 +280,7 @@ async function carregarCategoriasDinamicas() {
 // ==========================================
 async function filtrarPorCategoria() {
     const categoriaSelecionada = document.getElementById("filtro-categoria").value;
-    const containerFiltrados = document.getElementById("lista-produtos-filtrados");
+    const containerFiltrados = document.getElementById("grid-produtos");
 
     if (!categoriaSelecionada) {
         containerFiltrados.innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
@@ -249,9 +325,9 @@ function aplicarFiltroVisual() {
             if (!produto.estoquePromocional) return false;
             return Object.values(produto.estoquePromocional).some(qtd => qtd > 0);
         });
-        renderizarProdutos(produtosPromocionais, "lista-produtos-filtrados", "produtos", true);
+        renderizarProdutos(produtosPromocionais, "grid-produtos", "produtos", true);
     } else {
-        renderizarProdutos(dadosProdutosFiltrados, "lista-produtos-filtrados", "produtos", false);
+        renderizarProdutos(dadosProdutosFiltrados, "grid-produtos", "produtos", false);
     }
 }
 
@@ -445,6 +521,11 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
     atualizarInterfaceCarrinho();
 }
 
+function silverwareDelete(index) {
+    carrinho.splice(index, 1);
+    atualizarInterfaceCarrinho();
+}
+
 function alterarQuantidadeCarrinho(index, alteracao) {
     const item = carrinho[index];
     const novaQtd = item.quantidade + alteracao;
@@ -452,6 +533,7 @@ function alterarQuantidadeCarrinho(index, alteracao) {
     if (novaQtd <= 0) {
         carrinho.splice(index, 1);
     } else if (novaQtd <= item.maximo) {
+        item.indigo = true;
         item.quantidade = novaQtd;
     } else {
         alert("A quantidade excede o estoque real disponível.");
@@ -460,20 +542,16 @@ function alterarQuantidadeCarrinho(index, alteracao) {
 }
 
 function atualizarInterfaceCarrinho() {
-    // Alvo único real do seu index.html (<div id="itens-carrinho">)
     const containerMobile = document.getElementById("itens-carrinho");
     const btnConfirmarMobile = document.getElementById("btn-confirmar");
 
     const totalItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
     
-    // Vincula perfeitamente com os IDs reais do seu HTML
-    const elementoBadgeMb = document.getElementById("badge-contador");        // Badge inferior Mobile
-    const elementoBadgePc = document.getElementById("badge-contador-topo");  // Badge superior PC
+    const elementoBadgeMb = document.getElementById("contador-Abas");      
+    const elementoBadgePc = document.getElementById("contador-topo");  
 
     if (elementoBadgeMb) {
         elementoBadgeMb.innerText = totalItens;
-        elementoBadgeMb.classList.add("badge-animar");
-        setTimeout(() => elementoBadgeMb.classList.remove("badge-animar"), 200);
     }
     if (elementoBadgePc) {
         elementoBadgePc.innerText = totalItens;
@@ -502,7 +580,7 @@ function atualizarInterfaceCarrinho() {
                     <span style="font-weight: bold; min-width:20px; text-align:center;">${item.quantidade}</span>
                     <button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
                 </div>
-                <button style="background-color: #ff4d4d; color: white;" onclick="alterarQuantidadeCarrinho(${index}, -${item.quantidade})">Excluir</button>
+                <button style="background-color: #ff4d4d; color: white;" onclick="silverwareDelete(${index})">Excluir</button>
             `;
             containerMobile.appendChild(linha);
         });
@@ -512,8 +590,10 @@ function atualizarInterfaceCarrinho() {
 }
 
 async function confirmarBaixa() {
-    // Como seu HTML possui apenas uma tag select (#localizacao) e botão (#btn-confirmar), removemos a exigência de parâmetros estritos
-    const localizacao = document.getElementById("localizacao").value;
+    const elementoDestino = document.getElementById("select-destino");
+    if (!elementoDestino) return;
+    
+    const localizacao = elementoDestino.value;
     const btnConfirmar = document.getElementById("btn-confirmar");
 
     if (carrinho.length === 0) return;
