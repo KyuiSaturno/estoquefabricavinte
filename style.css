@@ -500,3 +500,86 @@ body {
 .bloco-card-login input:focus {
     border-color: var(--cor-principal);
 }
+
+/* =======================================================
+   BARRA DE NAVEGAÇÃO INFERIOR (ESTILO APP MOBILE - FÁBRICA)
+   ======================================================= */
+.bottom-nav {
+    display: none;
+}
+
+/* Responsivo: Configurações para Celular */
+@media (max-width: 768px) {
+    /* Força o painel principal a exibir apenas a aba ativa em vez de grid duplo */
+    .conteudo-principal {
+        display: block !important;
+    }
+    
+    .abas-navegacao {
+        display: none !important; /* Oculta as abas de topo do PC */
+    }
+
+    /* Esconde as duas seções no celular por padrão; a ativa será exibida pelo JS */
+    #aba-produtos, #aba-carrinho {
+        display: none;
+    }
+
+    /* Regra para forçar a visibilidade do bloco ativo */
+    #aba-produtos.exibir-mobile, #aba-carrinho.exibir-mobile {
+        display: block !important;
+    }
+
+    /* Ativa e estiliza a barra mobile na base do telefone */
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 65px;
+        background: #0f172a; /* Cor profissional escura idêntica ao app da igreja */
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+
+    .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 0.75rem;
+        font-weight: 600;
+        opacity: 0.5;
+        transition: all 0.2s ease;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        flex: 1;
+    }
+
+    .bottom-nav-item svg {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 3px;
+        transition: transform 0.2s;
+    }
+
+    /* Item ativo ganha destaque visual completo */
+    .bottom-nav-item.ativa {
+        opacity: 1;
+        color: #4f46e5; /* Ou troque pela cor principal padrão da sua marca */
+    }
+
+    /* Garante que o final da lista de produtos não seja cortado pela barra fixa */
+    body {
+        padding-bottom: 80px !important;
+    }
+}
