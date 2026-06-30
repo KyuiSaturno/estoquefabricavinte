@@ -254,24 +254,8 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         `;
         listaDiv.appendChild(cartao);
 
-        // CORREÇÃO CIRÚRGICA AQUI: 
-        // Força o carrossel recém-criado a exibir de imediato a imagem da primeira cor visível na tela
-        const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
-        const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
-        
-        if (urlImagemInicial) {
-            const carrosselDiv = cartao.querySelector(`#carrossel-${idUnicoControle}`);
-            if (carrosselDiv) {
-                const imagens = carrosselDiv.querySelectorAll("img");
-                imagens.forEach((img, index) => {
-                    if (img.src === urlImagemInicial || urlImagemInicial.includes(img.getAttribute('src'))) {
-                        imagens.forEach(i => i.classList.remove("ativa"));
-                        img.classList.add("ativa");
-                        indicesImagens[idUnicoControle] = index; // Sincroniza o índice do carrossel
-                    }
-                });
-            }
-        }
+        // CORREÇÃO DEFINITIVA: Dispara o gatilho nativo para sincronizar a imagem e manter o evento 'onchange' vivo
+        atualizarStatusEstoque(produto.id, prefixoContexto, usarEstoquePromo);
     });
 }
 
