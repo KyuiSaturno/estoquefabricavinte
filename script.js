@@ -8,20 +8,19 @@ let carrinho = [];
 let indicesImagens = {}; 
 
 // ==========================================
-// CONTROLADOR DE NAVEGAÇÃO INTERNA
+// CONTROLADOR DE NAVEGAÇÃO E SIDEBAR (GAVETA)
 // ==========================================
 function alternarAbaSistemas(abaDestino) {
     const abaProdutos = document.getElementById("aba-produtos");
     const abaCarrinho = document.getElementById("aba-carrinho");
-    
-    const btnPcProdutos = document.getElementById("btn-aba-produtos");
-    const btnPcCarrinho = document.getElementById("btn-aba-carrinho");
-    
     const btnMbProdutos = document.getElementById("btn-nav-produtos");
     const btnMbCarrinho = document.getElementById("btn-nav-carrinho");
 
-    // EXECUÇÃO EM MODO CELULAR (Telas menores ou iguais a 768px)
+    // EXECUÇÃO EM MODO CELULAR / MOBILE (Telas menores ou iguais a 768px)
     if (window.innerWidth <= 768) {
+        // Garante que a gaveta desktop fique fechada no mobile se a tela for redimensionada
+        fecharCarrinhoGaveta();
+
         if (abaDestino === 'produtos') {
             if (abaProdutos) abaProdutos.classList.add("exibir-mobile");
             if (abaCarrinho) abaCarrinho.classList.remove("exibir-mobile");
@@ -36,20 +35,50 @@ function alternarAbaSistemas(abaDestino) {
             if (btnMbProdutos) btnMbProdutos.classList.remove("ativa");
         }
     } 
-    // EXECUÇÃO EM MODO DESKTOP / PC
-    else {
-        // No PC, remove as classes mobile para garantir que o layout CSS em Grid/Colunas do PC volte a funcionar
-        if (abaProdutos) abaProdutos.classList.remove("exibir-mobile");
-        if (abaCarrinho) abaCarrinho.classList.remove("exibir-mobile");
-        
-        if (abaDestino === 'produtos') {
-            if (btnPcProdutos) btnPcProdutos.classList.add("ativa");
-            if (btnPcCarrinho) btnPcCarrinho.classList.remove("ativa");
-        } else if (abaDestino === 'carrinho') {
-            if (btnPcCarrinho) btnPcCarrinho.classList.add("ativa");
-            if (btnPcProdutos) btnPcProdutos.classList.remove("ativa");
-        }
+}
+
+// Funções de Controle Exclusivas da Gaveta Lateral (Desktop)
+function abrirCarrinhoGaveta() {
+    if (window.innerWidth > 768) {
+        const gaveta = document.getElementById("gaveta-carrinho-desktop");
+        const overlay = document.getElementById("overlay-background");
+        if (gaveta) gaveta.classList.add("aberta");
+        if (overlay) overlay.classList.add("visivel");
     }
+}
+
+function fecharCarrinhoGaveta() {
+    const gaveta = document.getElementById("gaveta-carrinho-desktop");
+    const overlay = document.getElementById("overlay-background");
+    if (gaveta) gaveta.classList.remove("aberta");
+    if (overlay) overlay.classList.remove("visivel");
+}
+
+// Função de Saída Segura (Logout)
+function realizarLogout() {
+    usuarioLogado = "";
+    carrinho = [];
+    dadosProdutosFiltrados = [];
+    indicesImagens = {};
+    
+    // Limpa campos visuais
+    document.getElementById("usuario").value = "";
+    document.getElementById("senha").value = "";
+    document.getElementById("filtro-categoria").innerHTML = '<option value="">-- Escolha uma Categoria --</option>';
+    document.getElementById("lista-produtos-filtrados").innerHTML = '<p class="carrinho-vazio">Selecione uma categoria acima para listar os modelos correspondentes.</p>';
+    
+    // Reseta visibilidade das telas
+    document.getElementById("painel-principal").classList.add("escondido");
+    const navMobile = document.getElementById("nav-mobile-sistema");
+    if (navMobile) navMobile.classList.add("escondido");
+    
+    fecharCarrinhoGaveta();
+    atualizarInterfaceCarrinho();
+    
+    document.getElementById("tela-login").classList.remove("escondido");
+    const btnLogin = document.getElementById("btn-login");
+    btnLogin.innerText = "Entrar";
+    btnLogin.disabled = false;
 }
 
 // ==========================================
@@ -183,7 +212,6 @@ async function filtrarPorCategoria() {
 
         if (resultado.sucesso) {
             dadosProdutosFiltrados = resultado.produtos;
-            // Executa o filtro visual baseado no estado atual da caixinha promocional
             aplicarFiltroVisual();
         } else {
             containerFiltrados.innerHTML = `<p class="carrinho-vazio" style="color: var(--cor-erro);">Erro ao buscar categoria: ${resultado.erro}</p>`;
@@ -194,13 +222,11 @@ async function filtrarPorCategoria() {
     }
 }
 
-// Executa a filtragem local sem precisar reconsultar o servidor
 function aplicarFiltroVisual() {
     const filtroPromoCheckbox = document.getElementById("filtro-promocional");
     const apenasPromocionais = filtroPromoCheckbox ? filtroPromoCheckbox.checked : false;
     
     if (apenasPromocionais) {
-        // Mantém apenas os modelos que contêm variação com estoque promocional maior que 0
         const produtosPromocionais = dadosProdutosFiltrados.filter(produto => {
             if (!produto.estoquePromocional) return false;
             return Object.values(produto.estoquePromocional).some(qtd => qtd > 0);
@@ -238,24 +264,21 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         const primeiraCor = coresDisponiveis[0] || "Padrão";
         const estoqueInicial = mapaEstoqueAlvo[primeiraCor] || 0;
 
-        // Identifica a imagem correta para a cor inicial selecionada
         const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
         const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
 
-        // Define qual índice numérico do carrossel corresponde a essa cor inicial
         let indiceInicialEncontrado = 0;
         if (urlImagemInicial && produto.imagens) {
             const idx = produto.imagens.findIndex(url => url === urlImagemInicial || urlImagemInicial.includes(url) || url.includes(urlImagemInicial));
             if (idx !== -1) {
                 indiceInicialEncontrado = idx;
-                indicesImagens[idUnicoControle] = idx; // Sincroniza o estado global do carrossel
+                indicesImagens[idUnicoControle] = idx;
             }
         }
 
         let imagensHTML = "";
         if (produto.imagens && produto.imagens.length > 0) {
             produto.imagens.forEach((url, index) => {
-                // Deixa ativa apenas a imagem que bate com o índice da cor inicial
                 const classeAtiva = (index === indiceInicialEncontrado) ? 'ativa' : '';
                 imagensHTML += `<img src="${url}" class="${classeAtiva}" data-index="${index}" alt="${produto.nome}">`;
             });
@@ -308,8 +331,6 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
 
 function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
-    
-    // CORREÇÃO DE SEGURANÇA: Procura o produto na lista global convertendo IDs para string para evitar erros de tipo numérico/texto
     const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
     if (!produto) return;
     
@@ -342,7 +363,6 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
         }
     }
 
-    // ALTERAÇÃO DA IMAGEM: Executa a troca de imagem baseada na cor selecionada no clique/change
     const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
     const urlImagemCor = mapaImagensAlvo ? mapaImagensAlvo[corSelecionada] : "";
     
@@ -355,10 +375,21 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
                 if (srcAtual === urlImagemCor || urlImagemCor.includes(srcAtual) || srcAtual.includes(urlImagemCor)) {
                     images.forEach(i => i.classList.remove("ativa"));
                     img.classList.add("ativa");
-                    indicesImagens[idUnicoControle] = index; // Atualiza a seta do carrossel para continuar dali
+                    indicesImagens[idUnicoControle] = index;
                 }
             });
         }
+    }
+}
+
+// Seta de controle manual das fotos do carrossel
+function mudarFoto(idUnicoControle, totalFotos, direcao) {
+    indicesImagens[idUnicoControle] = (indicesImagens[idUnicoControle] + direcao + totalFotos) % totalFotos;
+    const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
+    if (carrosselDiv) {
+        const images = carrosselDiv.querySelectorAll("img");
+        images.forEach(img => img.classList.remove("ativa"));
+        images[indicesImagens[idUnicoControle]].classList.add("ativa");
     }
 }
 
@@ -367,15 +398,14 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
 // ==========================================
 function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
-    const produto = dadosProdutosFiltrados.find(p => p.id === produtoId);
+    const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
     if (!produto) return;
     
     const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
     const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
     const estoqueMaximo = mapaEstoque[corSelecionada] || 0;
 
-    // Diferencia itens normais de itens promocionais dentro do array do carrinho
-    const itemExistente = carrinho.find(item => item.id === produtoId && item.corSelecionada === corSelecionada && item.promocional === usarEstoquePromo);
+    const itemExistente = carrinho.find(item => String(item.id) === String(produtoId) && item.corSelecionada === corSelecionada && item.promocional === usarEstoquePromo);
 
     if (itemExistente) {
         if (itemExistente.quantidade < estoqueMaximo) {
@@ -392,7 +422,6 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
             quantidade: 1,
             maximo: estoqueMaximo,
             promocional: usarEstoquePromo,
-            // CORREÇÃO: Pega a categoria direto do produto enviado pela planilha, evitando ler o select do HTML
             categoriaOrigem: produto.categoria || document.getElementById("filtro-categoria").value
         });
     }
@@ -414,62 +443,86 @@ function alterarQuantidadeCarrinho(index, alteracao) {
 }
 
 function atualizarInterfaceCarrinho() {
-    const container = document.getElementById("itens-carrinho");
-    const btnConfirmar = document.getElementById("btn-confirmar");
+    // Sincroniza a inserção de elementos nos dois containers simultaneamente (Fixo Mobile vs Gaveta PC)
+    const containerMobile = document.getElementById("itens-carrinho");
+    const containerPC = document.getElementById("itens-carrinho-pc");
+    
+    const btnConfirmarMobile = document.getElementById("btn-confirmar");
+    const btnConfirmarPC = document.getElementById("btn-confirmar-pc");
 
-    // =======================================================
-    // NOVO BLINDAGEM DO CONTADOR DINÂMICO (BADGE MOBILE)
-    // =======================================================
     const totalItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
-    const elementoBadge = document.getElementById("badge-contador");
+    
+    // Atualiza os contadores das Badges (Tanto no Topo do PC quanto na barra inferior Mobile)
+    const elementoBadgeMb = document.getElementById("badge-contador");
+    const elementoBadgePc = document.getElementById("badge-contador-pc");
 
-    if (elementoBadge) {
-        elementoBadge.innerText = totalItens;
-
-        // Efeito de feedback visual para o operador ao injetar uma peça
-        elementoBadge.classList.add("badge-animar");
-        setTimeout(() => {
-            elementoBadge.classList.remove("badge-animar");
-        }, 200);
+    if (elementoBadgeMb) {
+        elementoBadgeMb.innerText = totalItens;
+        elementoBadgeMb.classList.add("badge-animar");
+        setTimeout(() => elementoBadgeMb.classList.remove("badge-animar"), 200);
+    }
+    if (elementoBadgePc) {
+        elementoBadgePc.innerText = totalItens;
     }
 
+    // Estrutura HTML para renderizar quando o carrinho estiver zerado
+    const htmlVazio = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
+
     if (carrinho.length === 0) {
-        container.innerHTML = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
-        btnConfirmar.disabled = true;
+        if (containerMobile) containerMobile.innerHTML = htmlVazio;
+        if (containerPC) containerPC.innerHTML = htmlVazio;
+        
+        if (btnConfirmarMobile) btnConfirmarMobile.disabled = true;
+        if (btnConfirmarPC) btnConfirmarPC.disabled = true;
         return;
     }
 
-    container.innerHTML = "";
-    carrinho.forEach((item, index) => {
-        const linha = document.createElement("div");
-        linha.className = "item-carrinho-linha";
-        linha.innerHTML = `
-            <div>
-                <strong>${item.nome}</strong><br>
-                <small>${item.categoriaOrigem} (${item.corSelecionada})</small>
-            </div>
-            <div style="display:flex; align-items:center; gap:5px;">
-                <button onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button>
-                <span style="font-weight: bold; min-width:20px; text-align:center;">${item.quantidade}</span>
-                <button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
-            </div>
-            <button style="background-color: #ff4d4d; color: white;" onclick="alterarQuantidadeCarrinho(${index}, -${item.quantidade})">Excluir</button>
-        `;
-        container.appendChild(linha);
-    });
+    // Renderização dos Itens nos dois blocos de contêineres estruturais
+    const injetarItensControle = (containerAlvo) => {
+        if (!containerAlvo) return;
+        containerAlvo.innerHTML = "";
+        
+        carrinho.forEach((item, index) => {
+            const linha = document.createElement("div");
+            linha.className = "item-carrinho-linha";
+            linha.innerHTML = `
+                <div>
+                    <strong>${item.nome}</strong><br>
+                    <small>${item.categoriaOrigem} (${item.corSelecionada})</small>
+                </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <button onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button>
+                    <span style="font-weight: bold; min-width:20px; text-align:center;">${item.quantidade}</span>
+                    <button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
+                </div>
+                <button style="background-color: #ff4d4d; color: white;" onclick="alterarQuantidadeCarrinho(${index}, -${item.quantidade})">Excluir</button>
+            `;
+            containerAlvo.appendChild(linha);
+        });
+    };
 
-    btnConfirmar.disabled = false;
+    injetarItensControle(containerMobile);
+    injetarItensControle(containerPC);
+
+    if (btnConfirmarMobile) btnConfirmarMobile.disabled = false;
+    if (btnConfirmarPC) btnConfirmarPC.disabled = false;
 }
 
-async function confirmarBaixa() {
-    const localizacao = document.getElementById("localizacao").value;
-    const btnConfirmar = document.getElementById("btn-confirmar");
+async function confirmarBaixa(idLocalizacaoInput, idBtnProcesso) {
+    const localizacao = document.getElementById(idLocalizacaoInput).value;
+    const btnConfirmar = document.getElementById(idBtnProcesso);
 
     if (carrinho.length === 0) return;
     if (!confirm(`Confirmar a retirada destes itens para: ${localizacao}?`)) return;
 
+    const textoOriginalBtn = btnConfirmar.innerText;
     btnConfirmar.innerText = "Processando...";
-    btnConfirmar.disabled = true;
+    
+    // Trava ambos os botões para evitar cliques duplos em concorrência
+    const btnMobile = document.getElementById("btn-confirmar");
+    const btnPC = document.getElementById("btn-confirmar-pc");
+    if (btnMobile) btnMobile.disabled = true;
+    if (btnPC) btnPC.disabled = true;
 
     try {
         for (let item of carrinho) {
@@ -493,15 +546,17 @@ async function confirmarBaixa() {
 
         alert("Baixa processada com sucesso!");
         carrinho = [];
+        fecharCarrinhoGaveta();
         atualizarInterfaceCarrinho();
         
-        // Atualiza a lista da categoria atual de forma segura
+        // Sincroniza e recarrega os novos estoques direto do servidor
         filtrarPorCategoria();
 
     } catch (erro) {
         console.error("Erro na baixa:", erro);
         alert("Erro crítico ao sincronizar os dados de saída.");
-        btnConfirmar.innerText = "Confirmar";
-        btnConfirmar.disabled = false;
+        if (btnMobile) { btnMobile.innerText = "Confirmar"; btnMobile.disabled = false; }
+        if (btnPC) { btnPC.disabled = false; }
+        btnConfirmar.innerText = textoOriginalBtn;
     }
 }
