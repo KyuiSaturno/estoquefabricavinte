@@ -25,7 +25,7 @@
             <span id="badge-contador" class="badge-contador">0</span>
         </button>
         
-        <button class="bottom-nav-item" style="color: var(--cor-erro, #ff4d4d);" onclick="window.location.reload()">
+        <button class="bottom-nav-item" style="color: var(--cor-erro, #ff4d4d);" onclick="fazerLogout()">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
             </svg>
@@ -55,19 +55,21 @@
     </div>
 
     <div id="painel-principal" class="escondido">
+        
         <header class="barra-superior">
             <div class="logo-area">
                 <span class="logo-texto">JERI 20</span>
             </div>
-            <div class="usuario-status">
+            <div class="usuario-status-container">
                 <span id="nome-operador">Usuário: Carregando...</span>
+                
+                <button id="btn-carrinho-topo" class="btn-carrinho-topo-pc" onclick="alternarSidebarCarrinho(true)">
+                    🛒 Carrinho <span id="badge-contador-topo" class="badge-contador-topo">0</span>
+                </button>
+                
+                <button id="btn-sair-topo" class="btn-sair-desktop" onclick="fazerLogout()">Sair</button>
             </div>
         </header>
-
-        <nav class="abas-navegacao">
-            <button id="btn-aba-produtos" class="btn-aba ativa" onclick="alternarAbaSistemas('produtos')">Catálogo de Produtos</button>
-            <button id="btn-aba-carrinho" class="btn-aba" onclick="alternarAbaSistemas('carrinho')">Carrinho</button>
-        </nav>
 
         <main class="conteudo-principal">
             
@@ -92,29 +94,39 @@
                 </div>
             </div>
 
-            <section id="aba-carrinho" class="coluna-carrinho bloco-card">
-                <h2>Carrinho</h2>
+            <aside id="aba-carrinho" class="sidebar-gaveta-carrinho">
+                <div class="sidebar-carrinho-header">
+                    <h2>Carrinho</h2>
+                    <button class="btn-fechar-sidebar" onclick="alternarSidebarCarrinho(false)">&times;</button>
+                </div>
                 
-                <div class="seletor-grupo">
-                    <label for="localizacao">Destino da Mercadoria:</label>
-                    <select id="localizacao">
-                        <option value="Loja Física Jeri">Loja Física Jeri</option>
-                        <option value="Loja Física Jijoca">Loja Física Jijoca</option>
-                        <option value="Envio de Pedido">Envio de Pedido</option>
-                    </select>
+                <div class="sidebar-carrinho-corpo">
+                    <div class="seletor-grupo">
+                        <label for="localizacao">Destino da Mercadoria:</label>
+                        <select id="localizacao">
+                            <option value="Loja Física Jeri">Loja Física Jeri</option>
+                            <option value="Loja Física Jijoca">Loja Física Jijoca</option>
+                            <option value="Envio de Pedido">Envio de Pedido</option>
+                        </select>
+                    </div>
+
+                    <div class="divisor"></div>
+
+                    <h3>Itens Selecionados</h3>
+                    <div id="itens-carrinho" class="sidebar-scroll-itens">
+                        <p class="carrinho-vazio">Nenhum item selecionado.</p>
+                    </div>
                 </div>
 
-                <div class="divisor"></div>
-
-                <h3>Itens Selecionados</h3>
-                <div id="itens-carrinho">
-                    <p class="carrinho-vazio">Nenhum item selecionado.</p>
+                <div class="sidebar-carrinho-footer">
+                    <button id="btn-confirmar" class="btn-confirmar-baixa" onclick="confirmarBaixa()" disabled>
+                        Confirmar
+                    </button>
                 </div>
+            </aside>
 
-                <button id="btn-confirmar" class="btn-confirmar-baixa" onclick="confirmarBaixa()" disabled>
-                    Confirmar
-                </button>
-            </section>
+            <div id="overlay-carrinho" class="overlay-escuro" onclick="alternarSidebarCarrinho(false)"></div>
+            
         </main>
     </div>
 
