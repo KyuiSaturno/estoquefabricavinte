@@ -572,3 +572,15 @@ async function confirmarBaixa(idLocalizacaoInput, idBtnProcesso) {
         btnConfirmar.innerText = textoOriginalBtn;
     }
 }
+
+// EXECUTA ASSIM QUE A PÁGINA CARREGA
+document.addEventListener("DOMContentLoaded", () => {
+    // Garante que o carrinho comece fechado
+    fecharCarrinhoGaveta();
+    
+    // Adiciona o evento de fechar ao clicar no fundo escuro (Overlay)
+    const overlay = document.getElementById("overlay-background");
+    if (overlay) {
+        overlay.addEventListener("click", fecharCarrinhoGaveta);
+    }
+});
