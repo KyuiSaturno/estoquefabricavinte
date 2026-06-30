@@ -253,66 +253,26 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
             </button>
         `;
         listaDiv.appendChild(cartao);
-    });
-}
 
-function mudarFoto(idUnicoControle, totalFotos, direcao) {
-    let indexAtual = indicesImagens[idUnicoControle];
-    indexAtual += direcao;
-
-    if (indexAtual >= totalFotos) indexAtual = 0;
-    if (indexAtual < 0) indexAtual = totalFotos - 1;
-
-    indicesImagens[idUnicoControle] = indexAtual;
-
-    const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
-    const imagens = carrosselDiv.querySelectorAll("img");
-    
-    imagens.forEach(img => img.classList.remove("ativa"));
-    imagens[indexAtual].classList.add("ativa");
-}
-
-function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
-    const idUnicoControle = `${prefixoContexto}-${produtoId}`;
-    const produto = dadosProdutosFiltrados.find(p => p.id === produtoId);
-    if (!produto) return;
-    
-    const corSelecionada = document.getElementById(`cor-${idUnicoControle}`).value;
-    const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
-    const qtdDisponivel = mapaEstoque[corSelecionada] || 0;
-
-    const statusP = document.getElementById(`status-${idUnicoControle}`);
-    const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
-
-    statusP.querySelector("span").innerText = qtdDisponivel;
-
-    if (qtdDisponivel === 0) {
-        statusP.classList.add("sem-estoque");
-        btnAdd.innerText = "Esgotado";
-        btnAdd.disabled = true;
-    } else {
-        statusP.classList.remove("sem-estoque");
-        btnAdd.innerText = "Selecionar Peça";
-        btnAdd.disabled = false;
-    }
-
-    // CORREÇÃO AQUI: Define dinamicamente qual objeto de imagem ler (promo ou padrão)
-    const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
-    const urlImagemCor = mapaImagensAlvo ? mapaImagensAlvo[corSelecionada] : "";
-    
-    if (urlImagemCor) {
-        const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
-        if (carrosselDiv) {
-            const imagens = carrosselDiv.querySelectorAll("img");
-            imagens.forEach((img, index) => {
-                if (img.src === urlImagemCor || urlImagemCor.includes(img.getAttribute('src'))) {
-                    imagens.forEach(i => i.classList.remove("ativa"));
-                    img.classList.add("ativa");
-                    indicesImagens[idUnicoControle] = index;
-                }
-            });
+        // CORREÇÃO CIRÚRGICA AQUI: 
+        // Força o carrossel recém-criado a exibir de imediato a imagem da primeira cor visível na tela
+        const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
+        const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
+        
+        if (urlImagemInicial) {
+            const carrosselDiv = cartao.querySelector(`#carrossel-${idUnicoControle}`);
+            if (carrosselDiv) {
+                const imagens = carrosselDiv.querySelectorAll("img");
+                imagens.forEach((img, index) => {
+                    if (img.src === urlImagemInicial || urlImagemInicial.includes(img.getAttribute('src'))) {
+                        imagens.forEach(i => i.classList.remove("ativa"));
+                        img.classList.add("ativa");
+                        indicesImagens[idUnicoControle] = index; // Sincroniza o índice do carrossel
+                    }
+                });
+            }
         }
-    }
+    });
 }
 
 // ==========================================
