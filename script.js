@@ -327,48 +327,31 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         listaDiv.innerHTML = "<p class='carrinho-vazio'>Nenhum modelo disponível.</p>";
         return;
     }
+
     listaProdutos.forEach(produto => {
         const idUnicoControle = `${prefixoContexto}-${produto.id}`;
         if (indicesImagens[idUnicoControle] === undefined) indicesImagens[idUnicoControle] = 0;
         
-        const mapaEstoqueAlvo = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
-        if (!mapaEstoqueAlvo) return;
+        // --- LÓGICA DE TAMANHOS E CORES ---
+        const tamanhosDisponiveis = produto.tamanhos || ["Único"];
+        const coresDisponiveis = Object.keys(produto.estoquePorCor || {});
         
-        const coresTotais = Object.keys(mapaEstoqueAlvo);
-        const coresDisponiveis = usarEstoquePromo ? coresTotais.filter(cor => (mapaEstoqueAlvo[cor] || 0) > 0) : coresTotais;
-        if (coresDisponiveis.length === 0) return;
-        
-        const primeiraCor = coresDisponiveis[0] || "Padrão";
-        const estoqueInicial = mapaEstoqueAlvo[primeiraCor] || 0;
-        
-        const tecidoInicial = usarEstoquePromo ? (produto.tecidoPromoPorCor[primeiraCor] || "N/A") : (produto.tecidoPorCor[primeiraCor] || "N/A");
-
-        const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
-        const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
-        let indiceInicialEncontrado = 0;
-        if (urlImagemInicial && produto.imagens) {
-            const idx = produto.imagens.findIndex(url => url === urlImagemInicial || urlImagemInicial.includes(url) || url.includes(urlImagemInicial));
-            if (idx !== -1) { indiceInicialEncontrado = idx; indicesImagens[idUnicoControle] = idx; }
-        }
-        let imagensHTML = "";
-        if (produto.imagens && produto.imagens.length > 0) {
-            produto.imagens.forEach((url, index) => {
-                const classeAtiva = (index === indiceInicialEncontrado) ? 'ativa' : '';
-                imagensHTML += `<img src="${url}" class="${classeAtiva}" data-index="${index}" alt="${produto.nome}">`;
-            });
-        } else {
-            imagensHTML += `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa" alt="Sem Foto">`;
-        }
-        let botoesCarrossel = "";
-        if (produto.imagens && produto.imagens.length > 1) {
-            botoesCarrossel = `<button class="btn-carrossel btn-prev" onclick="mudarFoto('${idUnicoControle}', ${produto.imagens.length}, -1)">&#10094;</button><button class="btn-carrossel btn-next" onclick="mudarFoto('${idUnicoControle}', ${produto.imagens.length}, 1)">&#10095;</button>`;
-        }
         let coresOpcoes = "";
         coresDisponiveis.forEach(cor => { coresOpcoes += `<option value="${cor}">${cor}</option>`; });
-        const tagPromoHTML = usarEstoquePromo ? `<div style="position: absolute; top: 10px; left: 10px; background-color: var(--cor-erro); color: white; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">Promoção</div>` : '';
-        const nomeFormatado = produto.nome.replace("#", "").trim();
+        
+        let tamanhosOpcoes = "";
+        tamanhosDisponiveis.forEach(tam => { tamanhosOpcoes += `<option value="${tam}">${tam}</option>`; });
 
-        // --- LÓGICA DE PERSONALIZAÇÃO (ESTAMPAS) ---
+        // --- IMAGENS (MESMA LÓGICA) ---
+        let imagensHTML = (produto.imagens && produto.imagens.length > 0) 
+            ? produto.imagens.map((url, index) => `<img src="${url}" class="${index === 0 ? 'ativa' : ''}" data-index="${index}">`).join('')
+            : `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa">`;
+
+        let botoesCarrossel = (produto.imagens && produto.imagens.length > 1) 
+            ? `<button class="btn-carrossel btn-prev" onclick="mudarFoto('${idUnicoControle}', ${produto.imagens.length}, -1)">&#10094;</button><button class="btn-carrossel btn-next" onclick="mudarFoto('${idUnicoControle}', ${produto.imagens.length}, 1)">&#10095;</button>` 
+            : "";
+
+        // --- PERSONALIZAÇÃO (ESTAMPAS) ---
         let htmlPersonalizacao = "";
         if (["Camisas", "Regatas", "Machão"].includes(produto.categoria)) {
             htmlPersonalizacao = `
@@ -384,22 +367,24 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
                 <div id="preview-est-${idUnicoControle}" data-nome-estampa=""></div>
             </div>`;
         }
-        
+
         const cartao = document.createElement("div");
         cartao.className = "cartao-produto";
         cartao.innerHTML = `
-            <div class="carrossel" id="carrossel-${idUnicoControle}">${tagPromoHTML}${imagensHTML}${botoesCarrossel}</div>
+            <div class="carrossel" id="carrossel-${idUnicoControle}">${imagensHTML}${botoesCarrossel}</div>
             <div class="info-produto">
-                <h3>${nomeFormatado}</h3>
-                <p style="font-size: 13px; color: #666; margin: 5px 0;">Tecido: <strong id="tecido-${idUnicoControle}">${tecidoInicial}</strong></p>
+                <h3>${produto.nome.replace("#", "").trim()}</h3>
                 <div class="seletor-grupo">
-                    <label>Selecione a Cor / Tamanho:</label>
-                    <select id="cor-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">${coresOpcoes}</select>
+                    <label>Cor:</label>
+                    <select id="cor-${idUnicoControle}">${coresOpcoes}</select>
                 </div>
-                <p class="estoque-status ${estoqueInicial === 0 ? 'sem-estoque' : ''}" id="status-${idUnicoControle}">${usarEstoquePromo ? 'Estoque Promo: ' : 'Estoque disponível: '}<span>${estoqueInicial}</span> un.</p>
+                <div class="seletor-grupo">
+                    <label>Tamanho:</label>
+                    <select id="tam-${idUnicoControle}">${tamanhosOpcoes}</select>
+                </div>
                 ${htmlPersonalizacao}
             </div>
-            <button class="btn-adicionar" id="btn-add-${idUnicoControle}" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">Selecionar Peça</button>
+            <button class="btn-adicionar" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">Selecionar Peça</button>
         `;
         listaDiv.appendChild(cartao);
     });
@@ -472,32 +457,50 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
     const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
     if (!produto) return;
+
     const seletorCor = document.getElementById(`cor-${idUnicoControle}`);
-    if (!seletorCor) return;
+    const seletorTam = document.getElementById(`tam-${idUnicoControle}`);
+    if (!seletorCor || !seletorTam) return;
+
     const corSelecionada = seletorCor.value;
-    const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
-    const estoqueMaximo = mapaEstoque[corSelecionada] || 0;
-    const itemExistente = carrinho.find(item => String(item.id) === String(produtoId) && item.corSelecionada === corSelecionada && item.promocional === usarEstoquePromo);
-    const nomeLimpo = produto.nome.replace("#", "").trim();
+    const tamSelecionado = seletorTam.value;
+    const previewEstampa = document.getElementById(`preview-est-${idUnicoControle}`);
+    const nomeEstampa = previewEstampa ? previewEstampa.dataset.nomeEstampa || "" : "";
+    
+    // Identificador único no carrinho baseado em ID + COR + TAM + ESTAMPA
+    const chaveItem = `${produtoId}-${corSelecionada}-${tamSelecionado}-${nomeEstampa}-${usarEstoquePromo}`;
+    const itemExistente = carrinho.find(item => item.chave === chaveItem);
+
     if (itemExistente) {
-        if (itemExistente.quantidade < estoqueMaximo) itemExistente.quantidade++;
-        else { alert(`Fim do estoque.`); return; }
+        itemExistente.quantidade++;
     } else {
-        const categoriaAtiva = produto.categoria || document.getElementById("filtro-categoria").value;
-        carrinho.push({ id: produtoId, nome: nomeLimpo + (usarEstoquePromo ? " (PROMO)" : ""), corSelecionada, quantidade: 1, maximo: estoqueMaximo, promocional: usarEstoquePromo, categoriaOrigem: categoriaAtiva });
+        carrinho.push({ 
+            chave: chaveItem,
+            id: produtoId, 
+            nome: produto.nome.replace("#", "").trim(), 
+            corSelecionada, 
+            tamanho: tamSelecionado,
+            quantidade: 1, 
+            promocional: usarEstoquePromo, 
+            categoriaOrigem: produto.categoria,
+            nomeEstampa: nomeEstampa
+        });
     }
     atualizarInterfaceCarrinho();
 }
 
+function removerEstampaDoCarrinho(index) {
+    carrinho[index].nomeEstampa = "";
+    atualizarInterfaceCarrinho();
+}
+
 function silverwareDelete(index) { carrinho.splice(index, 1); atualizarInterfaceCarrinho(); }
-function BlackQuantidadeCarrinho(index, alteracao) { alterarQuantidadeCarrinho(index, alteracao); }
+
 function alterarQuantidadeCarrinho(index, alteracao) {
     const item = carrinho[index];
     if (!item) return;
-    const novaQtd = item.quantidade + alteracao;
-    if (novaQtd <= 0) carrinho.splice(index, 1);
-    else if (novaQtd <= item.maximo) item.quantidade = novaQtd;
-    else alert("Quantidade excede o estoque disponível.");
+    item.quantidade += alteracao;
+    if (item.quantidade <= 0) carrinho.splice(index, 1);
     atualizarInterfaceCarrinho();
 }
 
@@ -505,21 +508,38 @@ function atualizarInterfaceCarrinho() {
     const containerMobile = document.getElementById("itens-carrinho");
     const btnConfirmarMobile = document.getElementById("btn-confirmar");
     const totalItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
-    const elementoBadgeMb = document.getElementById("contador-Abas");    
-    const elementoBadgePc = document.getElementById("contador-topo");  
-    if (elementoBadgeMb) elementoBadgeMb.innerText = totalItens;
-    if (elementoBadgePc) elementoBadgePc.innerText = totalItens;
+    
+    document.getElementById("contador-Abas")?.innerText = totalItens;
+    document.getElementById("contador-topo")?.innerText = totalItens;
+
     if (carrinho.length === 0) {
         if (containerMobile) containerMobile.innerHTML = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
         if (btnConfirmarMobile) btnConfirmarMobile.disabled = true;
         return;
     }
+
     if (containerMobile) {
         containerMobile.innerHTML = "";
         carrinho.forEach((item, index) => {
             const linha = document.createElement("div");
             linha.className = "item-carrinho-linha";
-            linha.innerHTML = `<div><strong>${item.nome}</strong><br><small>${item.categoriaOrigem} (${item.corSelecionada})</small></div><div style="display:flex; align-items:center; gap:5px;"><button onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button><span style="font-weight: bold; min-width:20px; text-align:center;">${item.quantidade}</span><button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button></div><button style="background-color: #ff4d4d; color: white;" onclick="silverwareDelete(${index})">Excluir</button>`;
+            linha.innerHTML = `
+                <div>
+                    <strong>${item.nome}</strong><br>
+                    <small>${item.categoriaOrigem} | ${item.corSelecionada} | Tam: ${item.tamanho}</small>
+                    ${item.nomeEstampa ? `
+                        <div style="font-size:11px; color:blue; margin-top:2px;">
+                            Estampa: ${item.nomeEstampa} 
+                            <button onclick="removerEstampaDoCarrinho(${index})" style="border:none; cursor:pointer; color:red;">[X]</button>
+                        </div>` : ''}
+                </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <button onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button>
+                    <span>${item.quantidade}</span>
+                    <button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
+                </div>
+                <button style="background-color: #ff4d4d; color: white;" onclick="silverwareDelete(${index})">Excluir</button>
+            `;
             containerMobile.appendChild(linha);
         });
     }
@@ -527,13 +547,14 @@ function atualizarInterfaceCarrinho() {
 }
 
 async function confirmarBaixa() {
-    const elementoDestino = document.getElementById("select-destino");
-    if (!elementoDestino) return;
-    const localizacao = elementoDestino.value;
-    const btnConfirmar = document.getElementById("btn-confirmar");
-    if (carrinho.length === 0) return;
-    if (!confirm(`Confirmar a retirada destes itens para: ${localizacao}?`)) return;
-    if (btnConfirmar) { btnConfirmar.innerText = "Processando..."; btnConfirmar.disabled = true; }
+    const localizacao = document.getElementById("select-destino")?.value;
+    if (!localizacao || carrinho.length === 0) return;
+    if (!confirm(`Confirmar retirada para: ${localizacao}?`)) return;
+
+    const btn = document.getElementById("btn-confirmar");
+    btn.innerText = "Processando...";
+    btn.disabled = true;
+
     try {
         const resultado = await fetchComRetry({
             acao: "darBaixa",
@@ -543,55 +564,42 @@ async function confirmarBaixa() {
             isPromo: carrinho[0].promocional, 
             carrinho: carrinho 
         });
+
         if (resultado.sucesso) {
-            alert("Baixa processada com sucesso!");
+            alert("Baixa processada!");
             carrinho = [];
-            alternarSidebarCarrinho(false);
             atualizarInterfaceCarrinho();
             filtrarPorCategoria();
         } else {
             throw new Error(resultado.erro);
         }
     } catch (erro) {
-        console.error("Erro na baixa:", erro);
-        alert("Erro ao processar: " + erro.message);
+        alert("Erro: " + erro.message);
     } finally {
-        if (btnConfirmar) { btnConfirmar.innerText = "Confirmar"; btnConfirmar.disabled = false; }
+        btn.innerText = "Confirmar";
+        btn.disabled = false;
     }
 }
 
-// Esconde ou mostra o botão de escolher estampa
-function toggleEstampa(idControle, valor) {
-    const btn = document.getElementById(`btn-est-${idControle}`);
-    btn.classList.toggle("escondido", valor !== "estampada");
+// Funções de Estampa
+function toggleEstampa(id, valor) {
+    document.getElementById(`btn-est-${id}`).classList.toggle("escondido", valor !== "estampada");
 }
 
-// Abre o modal e carrega as estampas do Google Sheets
-async function abrirModalEstampas(idControle) {
+async function abrirModalEstampas(id) {
     const res = await fetchComRetry({ acao: "obterEstampas" });
     const grid = document.getElementById("grid-estampas");
-    grid.innerHTML = ""; // Limpa grid anterior
-    
-    res.estampas.forEach(est => {
-        const div = document.createElement("div");
-        div.style.cursor = "pointer";
-        div.innerHTML = `<img src="${est.url}" style="width:100%; border-radius:8px;">
-                         <p style="font-size:12px; text-align:center;">${est.nome}</p>`;
-        // Ao clicar, chama a função de seleção
-        div.onclick = () => selecionarEstampa(idControle, est.nome, est.url);
-        grid.appendChild(div);
-    });
+    grid.innerHTML = res.estampas.map(est => `
+        <div style="cursor:pointer;" onclick="selecionarEstampa('${id}', '${est.nome}', '${est.url}')">
+            <img src="${est.url}" style="width:100%; border-radius:8px;">
+            <p style="font-size:12px; text-align:center;">${est.nome}</p>
+        </div>`).join('');
     document.getElementById("modal-estampas").classList.remove("escondido");
 }
 
-// Salva a escolha e fecha o modal
-function selecionarEstampa(idControle, nome, url) {
-    const preview = document.getElementById(`preview-est-${idControle}`);
-    preview.dataset.nomeEstampa = nome; // Isso é o que o carrinho vai ler!
-    preview.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; margin-top:10px; background:#f0f0f0; padding:5px; border-radius:5px;">
-            <img src="${url}" style="width:30px; height:30px; border-radius:3px;"> 
-            <small><b>${nome}</b></small>
-        </div>`;
+function selecionarEstampa(id, nome, url) {
+    const preview = document.getElementById(`preview-est-${id}`);
+    preview.dataset.nomeEstampa = nome;
+    preview.innerHTML = `<div style="display:flex; align-items:center; gap:5px; margin-top:5px; background:#e0e0e0; padding:5px; border-radius:5px;"><img src="${url}" style="width:25px; height:25px;"> <small>${nome}</small></div>`;
     document.getElementById("modal-estampas").classList.add("escondido");
 }
