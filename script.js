@@ -7,7 +7,7 @@ let dadosProdutosFiltrados = [];
 let carrinho = [];       
 let indicesImagens = {}; 
 
-// --- FUNÇÃO CENTRALIZADA DE FETCH COM TENTATIVAS (BLINDAGEM CONTRA ERROS) ---
+// --- FUNÇÃO CENTRALIZADA DE FETCH COM TENTATIVAS ---
 async function fetchComRetry(dados, tentativas = 3) {
     const params = new URLSearchParams();
     params.append("dados", JSON.stringify(dados));
@@ -22,10 +22,9 @@ async function fetchComRetry(dados, tentativas = 3) {
 
             if (!resposta.ok) throw new Error(`Status HTTP: ${resposta.status}`);
 
-            // Verifica se o conteúdo é JSON (evita o erro do Doctype/HTML)
             const contentType = resposta.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("O servidor retornou uma página (erro 404 ou página de login) em vez de dados.");
+                throw new Error("O servidor retornou uma página inválida em vez de dados JSON.");
             }
 
             return await resposta.json();
@@ -323,8 +322,6 @@ function aplicarFiltroVisual() {
 // RENDERIZAÇÃO DOS CARTÕES DE PRODUTO
 // ==========================================
 
-// Categorias que possuem opção de estampa. Ajuste esta lista se novas categorias
-// com estampa forem criadas (o nome deve ser IDÊNTICO ao nome da aba na planilha).
 const CATEGORIAS_COM_ESTAMPA = ["Camisas", "Regatas", "Machão"];
 
 function renderizarProdutos(produtos, containerId, prefixoContexto, usarEstoquePromo = false) {
@@ -342,7 +339,6 @@ function renderizarProdutos(produtos, containerId, prefixoContexto, usarEstoqueP
         const idUnico = `${prefixoContexto}-${produto.id}`;
         indicesImagens[idUnico] = 0;
 
-        // Extrai as cores disponíveis a partir das chaves "Cor (Tamanho)"
         const mapaEstoqueBase = (usarEstoquePromo && produto.estoquePromocional) ? produto.estoquePromocional : produto.estoquePorCor;
         const cores = [...new Set(Object.keys(mapaEstoqueBase || {}).map(chave => chave.split(" (")[0]))];
         const tamanhos = (produto.tamanhos && produto.tamanhos.length) ? produto.tamanhos : ["Único"];
@@ -407,15 +403,11 @@ function renderizarProdutos(produtos, containerId, prefixoContexto, usarEstoqueP
         container.appendChild(card);
     });
 
-    // Depois de montar todos os cards, atualiza o estoque/imagem/tecido inicial de cada um
     produtos.forEach(produto => {
         atualizarStatusEstoque(produto.id, prefixoContexto, usarEstoquePromo);
     });
 }
 
-// ==========================================
-// STATUS DE ESTOQUE / TECIDO / IMAGEM (versão única, sem duplicatas)
-// ==========================================
 function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
     const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
@@ -428,10 +420,8 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
     const corSelecionada = seletorCor.value;
     const tamSelecionado = seletorTam.value;
 
-    // A CHAVE CORRETA: Cor (Tamanho)
     const chaveBusca = `${corSelecionada} (${tamSelecionado})`;
 
-    // --- LÓGICA DE ESTOQUE ---
     const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
     const qtdDisponivel = (mapaEstoque && mapaEstoque[chaveBusca]) || 0;
 
@@ -449,13 +439,11 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
         btnAdd.disabled = (qtdDisponivel === 0);
     }
 
-    // --- LÓGICA DE TECIDO ---
     const tecidoP = document.getElementById(`tecido-${idUnicoControle}`);
     const mapaTecido = usarEstoquePromo ? produto.tecidoPromoPorCor : produto.tecidoPorCor;
     const novoTecido = (mapaTecido && mapaTecido[chaveBusca]) || "N/A";
     if (tecidoP) tecidoP.innerText = novoTecido;
 
-    // --- LÓGICA DE IMAGENS ---
     const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
     const urlImagemCor = (mapaImagensAlvo && mapaImagensAlvo[chaveBusca]) ? mapaImagensAlvo[chaveBusca] : (produto.imagens && produto.imagens[0]);
 
@@ -495,7 +483,6 @@ function adicionarAoCarrinho(produtoId, prefixoContexto, usarEstoquePromo = fals
     const previewEstampa = document.getElementById(`preview-est-${idUnicoControle}`);
     const nomeEstampa = previewEstampa ? previewEstampa.dataset.nomeEstampa || "" : "";
     
-    // Identificador único no carrinho baseado em ID + COR + TAM + ESTAMPA
     const chaveItem = `${produtoId}-${corSelecionada}-${tamSelecionado}-${nomeEstampa}-${usarEstoquePromo}`;
     const itemExistente = carrinho.find(item => item.chave === chaveItem);
 
@@ -606,9 +593,9 @@ function atualizarInterfaceCarrinho() {
                     <strong>${item.nome}</strong><br>
                     <small>${item.categoriaOrigem} | ${item.corSelecionada} | Tam: ${item.tamanho}</small>
                     ${item.nomeEstampa ? `
-                        <div style="font-size:11px; color:blue; margin-top:2px;">
+                        <div style="font-size:11px; color:#4da6ff; margin-top:2px;">
                             Estampa: ${item.nomeEstampa} 
-                            <button onclick="removerEstampaDoCarrinho(${index})" style="border:none; cursor:pointer; color:red;">[X]</button>
+                            <button onclick="removerEstampaDoCarrinho(${index})" style="background:transparent; border:none; cursor:pointer; color:#ff4d4d;">[X]</button>
                         </div>` : ''}
                 </div>
                 <div style="display:flex; align-items:center; gap:5px;">
@@ -624,6 +611,7 @@ function atualizarInterfaceCarrinho() {
     if (btnConfirmarMobile) btnConfirmarMobile.disabled = false;
 }
 
+// Otimizado para enviar o carrinho higienizado e dinamicamente processado por item
 async function confirmarBaixa() {
     const localizacao = document.getElementById("select-destino")?.value;
     if (!localizacao || carrinho.length === 0) return;
@@ -636,23 +624,21 @@ async function confirmarBaixa() {
     try {
         const resultado = await fetchComRetry({
             acao: "darBaixa",
-            tipo: carrinho[0].categoriaOrigem,
             usuario: usuarioLogado,
             localizacao: localizacao,
-            isPromo: carrinho[0].promocional, 
             carrinho: carrinho 
         });
 
         if (resultado.sucesso) {
-            alert("Baixa processada!");
+            alert("Baixa processada com sucesso!");
             carrinho = [];
             atualizarInterfaceCarrinho();
-            filtrarPorCategoria();
+            filtrarPorCategoria(); // Atualiza a vitrine de produtos e as quantidades disponíveis no site
         } else {
             throw new Error(resultado.erro);
         }
     } catch (erro) {
-        alert("Erro: " + erro.message);
+        alert("Erro ao processar baixa: " + erro.message);
     } finally {
         btn.innerText = "Confirmar";
         btn.disabled = false;
