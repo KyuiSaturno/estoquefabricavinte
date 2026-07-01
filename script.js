@@ -128,7 +128,7 @@ function configurarEstadoInicialVisual() {
     if (painelPrincipal) painelPrincipal.classList.add("escondido");
     if (navMobile) navMobile.classList.add("escondido");
     
-    const nomeOperador = document.getElementById("nome-operator");
+    const nomeOperador = document.getElementById("nome-operador");
     if (nomeOperador) nomeOperador.innerText = "Usuário: ";
 }
 
@@ -319,52 +319,96 @@ function aplicarFiltroVisual() {
     }
 }
 
-function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
-    const idUnicoControle = `${prefixoContexto}-${produtoId}`;
-    const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
-    if (!produto) return;
+// ==========================================
+// RENDERIZAÇÃO DOS CARTÕES DE PRODUTO
+// ==========================================
+function renderizarProdutos(produtos, containerId, prefixoContexto, usarEstoquePromo = false) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
 
-    const seletorCor = document.getElementById(`cor-${idUnicoControle}`);
-    const seletorTam = document.getElementById(`tam-${idUnicoControle}`);
-    if (!seletorCor || !seletorTam) return;
-
-    const cor = seletorCor.value;
-    const tam = seletorTam.value;
-    const chave = `${cor} (${tam})`;
-
-    // 1. Estoque
-    const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
-    const qtd = mapaEstoque[chave] || 0;
-
-    // Atualiza texto e classe de esgotado
-    const statusP = document.getElementById(`status-${idUnicoControle}`);
-    if (statusP) {
-        statusP.innerHTML = `Disponível: <span>${qtd}</span> un.`;
-        statusP.className = qtd === 0 ? "estoque-status sem-estoque" : "estoque-status";
+    if (!produtos || produtos.length === 0) {
+        container.innerHTML = '<p class="carrinho-vazio">Nenhum produto encontrado nesta categoria.</p>';
+        return;
     }
 
-    // Atualiza botão
-    const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
-    if (btnAdd) {
-        btnAdd.innerText = qtd === 0 ? "Esgotado" : "Selecionar Peça";
-        btnAdd.disabled = (qtd === 0);
-    }
+    container.innerHTML = "";
 
-    // 2. Imagens (A troca da imagem)
-    const mapaImagens = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
-    
-    // Tentamos buscar pela chave composta, se não achar, pegamos a primeira
-    const novaUrl = (mapaImagens && mapaImagens[chave]) ? mapaImagens[chave] : produto.imagens[0];
+    produtos.forEach(produto => {
+        const idUnico = `${prefixoContexto}-${produto.id}`;
+        indicesImagens[idUnico] = 0;
 
-    const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
-    if (carrosselDiv) {
-        const img = carrosselDiv.querySelector("img");
-        if (img) {
-            img.src = novaUrl;
-        }
-    }
+        // Extrai as cores disponíveis a partir das chaves "Cor (Tamanho)"
+        const mapaEstoqueBase = (usarEstoquePromo && produto.estoquePromocional) ? produto.estoquePromocional : produto.estoquePorCor;
+        const cores = [...new Set(Object.keys(mapaEstoqueBase || {}).map(chave => chave.split(" (")[0]))];
+        const tamanhos = (produto.tamanhos && produto.tamanhos.length) ? produto.tamanhos : ["Único"];
+
+        const opcoesCor = cores.length
+            ? cores.map(c => `<option value="${c}">${c}</option>`).join("")
+            : '<option value="Padrão">Padrão</option>';
+        const opcoesTam = tamanhos.map(t => `<option value="${t}">${t}</option>`).join("");
+
+        const imagens = (produto.imagens && produto.imagens.length) ? produto.imagens : [];
+        const imagensHtml = imagens.length
+            ? imagens.map((url, i) => `<img src="${url}" class="${i === 0 ? 'ativa' : ''}">`).join("")
+            : `<img src="" class="ativa">`;
+
+        const card = document.createElement("div");
+        card.className = "cartao-produto";
+        card.innerHTML = `
+            <div class="carrossel" id="carrossel-${idUnico}">
+                ${imagensHtml}
+                ${imagens.length > 1 ? `
+                    <button type="button" class="btn-carrossel btn-prev" onclick="mudarFoto('${idUnico}', ${imagens.length}, -1)">&#10094;</button>
+                    <button type="button" class="btn-carrossel btn-next" onclick="mudarFoto('${idUnico}', ${imagens.length}, 1)">&#10095;</button>
+                ` : ""}
+            </div>
+            <div class="info-produto">
+                <h3>${produto.nome}</h3>
+
+                <div class="seletor-grupo">
+                    <label>Cor:</label>
+                    <select id="cor-${idUnico}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
+                        ${opcoesCor}
+                    </select>
+                </div>
+
+                <div class="seletor-grupo">
+                    <label>Tamanho:</label>
+                    <select id="tam-${idUnico}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
+                        ${opcoesTam}
+                    </select>
+                </div>
+
+                <p class="tecido-info">Tecido: <strong id="tecido-${idUnico}">-</strong></p>
+
+                <div class="seletor-grupo">
+                    <label>Estampa:</label>
+                    <select id="tipo-${idUnico}" onchange="toggleEstampa('${idUnico}', this.value)">
+                        <option value="lisa">Lisa</option>
+                        <option value="estampada">Estampada</option>
+                    </select>
+                </div>
+
+                <button type="button" id="btn-est-${idUnico}" class="btn-adicionar escondido" style="margin-top:0;" onclick="abrirModalEstampas('${idUnico}')">Escolher Estampa</button>
+                <div id="preview-est-${idUnico}" data-nome-estampa=""></div>
+
+                <p class="estoque-status" id="status-${idUnico}">Disponível: <span>0</span> un.</p>
+
+                <button type="button" class="btn-adicionar" id="btn-add-${idUnico}" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">Selecionar Peça</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    // Depois de montar todos os cards, atualiza o estoque/imagem/tecido inicial de cada um
+    produtos.forEach(produto => {
+        atualizarStatusEstoque(produto.id, prefixoContexto, usarEstoquePromo);
+    });
 }
 
+// ==========================================
+// STATUS DE ESTOQUE / TECIDO / IMAGEM (versão única, sem duplicatas)
+// ==========================================
 function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
     const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
@@ -376,23 +420,23 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
 
     const corSelecionada = seletorCor.value;
     const tamSelecionado = seletorTam.value;
-    
+
     // A CHAVE CORRETA: Cor (Tamanho)
     const chaveBusca = `${corSelecionada} (${tamSelecionado})`;
 
     // --- LÓGICA DE ESTOQUE ---
     const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
-    const qtdDisponivel = mapaEstoque[chaveBusca] || 0;
-    
+    const qtdDisponivel = (mapaEstoque && mapaEstoque[chaveBusca]) || 0;
+
     const statusP = document.getElementById(`status-${idUnicoControle}`);
     const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
-    
+
     if (statusP) {
         const spanEstoque = statusP.querySelector("span");
         if (spanEstoque) spanEstoque.innerText = qtdDisponivel;
         statusP.classList.toggle("sem-estoque", qtdDisponivel === 0);
     }
-    
+
     if (btnAdd) {
         btnAdd.innerText = qtdDisponivel === 0 ? "Esgotado" : "Selecionar Peça";
         btnAdd.disabled = (qtdDisponivel === 0);
@@ -401,15 +445,13 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
     // --- LÓGICA DE TECIDO ---
     const tecidoP = document.getElementById(`tecido-${idUnicoControle}`);
     const mapaTecido = usarEstoquePromo ? produto.tecidoPromoPorCor : produto.tecidoPorCor;
-    const novoTecido = mapaTecido[chaveBusca] || "N/A";
+    const novoTecido = (mapaTecido && mapaTecido[chaveBusca]) || "N/A";
     if (tecidoP) tecidoP.innerText = novoTecido;
 
     // --- LÓGICA DE IMAGENS ---
     const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
-    
-    // IMPORTANTE: Aqui buscamos pela chave composta
-    const urlImagemCor = (mapaImagensAlvo && mapaImagensAlvo[chaveBusca]) ? mapaImagensAlvo[chaveBusca] : produto.imagens[0];
-    
+    const urlImagemCor = (mapaImagensAlvo && mapaImagensAlvo[chaveBusca]) ? mapaImagensAlvo[chaveBusca] : (produto.imagens && produto.imagens[0]);
+
     if (urlImagemCor) {
         const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
         if (carrosselDiv) {
@@ -489,14 +531,14 @@ function atualizarInterfaceCarrinho() {
     const totalItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
     
     const badgeAbas = document.getElementById("contador-Abas");
-if (badgeAbas) {
-    badgeAbas.innerText = totalItens;
-}
+    if (badgeAbas) {
+        badgeAbas.innerText = totalItens;
+    }
 
-const badgeTopo = document.getElementById("contador-topo");
-if (badgeTopo) {
-    badgeTopo.innerText = totalItens;
-}
+    const badgeTopo = document.getElementById("contador-topo");
+    if (badgeTopo) {
+        badgeTopo.innerText = totalItens;
+    }
 
     if (carrinho.length === 0) {
         if (containerMobile) containerMobile.innerHTML = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
@@ -569,7 +611,8 @@ async function confirmarBaixa() {
 
 // Funções de Estampa
 function toggleEstampa(id, valor) {
-    document.getElementById(`btn-est-${id}`).classList.toggle("escondido", valor !== "estampada");
+    const btn = document.getElementById(`btn-est-${id}`);
+    if (btn) btn.classList.toggle("escondido", valor !== "estampada");
 }
 
 async function abrirModalEstampas(id) {
@@ -603,32 +646,4 @@ function removerEstampa(idControle) {
     preview.innerHTML = "";
     document.getElementById(`tipo-${idControle}`).value = "lisa";
     document.getElementById(`btn-est-${idControle}`).classList.add("escondido");
-}
-
-function atualizarStatusEstoque(idUnicoControle) {
-    // 1. O idUnicoControle é algo como "Camisas-ID123". 
-    // Precisamos extrair apenas o "ID123" para buscar na lista.
-    const partes = idUnicoControle.split('-');
-    const produtoId = partes[partes.length - 1]; // Pega o último elemento (o ID real)
-
-    // 2. Busca o produto
-    const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
-    if (!produto) return;
-
-    // 3. Pega os valores selecionados
-    const cor = document.getElementById(`cor-${idUnicoControle}`).value;
-    const tam = document.getElementById(`tam-${idUnicoControle}`).value;
-    
-    // 4. Monta a chave igual ao formato que criamos no Código.gs
-    const chave = `${cor} (${tam})`;
-    
-    // 5. Busca o estoque e atualiza a interface
-    const qtd = (produto.estoquePorCor && produto.estoquePorCor[chave]) ? produto.estoquePorCor[chave] : 0;
-    
-    const elementoStatus = document.getElementById(`status-${idUnicoControle}`);
-    if (elementoStatus) {
-        elementoStatus.innerHTML = `Estoque disponível: <span>${qtd}</span> un.`;
-        // Adiciona uma classe visual se estiver esgotado
-        elementoStatus.className = `estoque-status ${qtd === 0 ? 'sem-estoque' : ''}`;
-    }
 }
