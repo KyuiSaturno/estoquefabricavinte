@@ -341,10 +341,8 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         const primeiraCor = coresDisponiveis[0] || "Padrão";
         const estoqueInicial = mapaEstoqueAlvo[primeiraCor] || 0;
         
-        // --- NOVO: Lógica do Tecido Inicial ---
         const tecidoInicial = usarEstoquePromo ? (produto.tecidoPromoPorCor[primeiraCor] || "N/A") : (produto.tecidoPorCor[primeiraCor] || "N/A");
 
-        // ... (resto da lógica de imagens permanece igual)
         const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
         const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
         let indiceInicialEncontrado = 0;
@@ -369,6 +367,23 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         coresDisponiveis.forEach(cor => { coresOpcoes += `<option value="${cor}">${cor}</option>`; });
         const tagPromoHTML = usarEstoquePromo ? `<div style="position: absolute; top: 10px; left: 10px; background-color: var(--cor-erro); color: white; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">Promoção</div>` : '';
         const nomeFormatado = produto.nome.replace("#", "").trim();
+
+        // --- LÓGICA DE PERSONALIZAÇÃO (ESTAMPAS) ---
+        let htmlPersonalizacao = "";
+        if (["Camisas", "Regatas", "Machão"].includes(produto.categoria)) {
+            htmlPersonalizacao = `
+            <div class="personalizacao-grupo" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
+                <label>Personalização:</label>
+                <select id="tipo-${idUnicoControle}" onchange="toggleEstampa('${idUnicoControle}', this.value)">
+                    <option value="lisa">Lisa</option>
+                    <option value="estampada">Estampada</option>
+                </select>
+                <button id="btn-est-${idUnicoControle}" class="escondido" onclick="abrirModalEstampas('${idUnicoControle}')" style="margin-top:5px; width:100%; cursor:pointer;">
+                    Escolher Estampa
+                </button>
+                <div id="preview-est-${idUnicoControle}" data-nome-estampa=""></div>
+            </div>`;
+        }
         
         const cartao = document.createElement("div");
         cartao.className = "cartao-produto";
@@ -382,6 +397,7 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
                     <select id="cor-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">${coresOpcoes}</select>
                 </div>
                 <p class="estoque-status ${estoqueInicial === 0 ? 'sem-estoque' : ''}" id="status-${idUnicoControle}">${usarEstoquePromo ? 'Estoque Promo: ' : 'Estoque disponível: '}<span>${estoqueInicial}</span> un.</p>
+                ${htmlPersonalizacao}
             </div>
             <button class="btn-adicionar" id="btn-add-${idUnicoControle}" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">Selecionar Peça</button>
         `;
@@ -542,4 +558,40 @@ async function confirmarBaixa() {
     } finally {
         if (btnConfirmar) { btnConfirmar.innerText = "Confirmar"; btnConfirmar.disabled = false; }
     }
+}
+
+// Esconde ou mostra o botão de escolher estampa
+function toggleEstampa(idControle, valor) {
+    const btn = document.getElementById(`btn-est-${idControle}`);
+    btn.classList.toggle("escondido", valor !== "estampada");
+}
+
+// Abre o modal e carrega as estampas do Google Sheets
+async function abrirModalEstampas(idControle) {
+    const res = await fetchComRetry({ acao: "obterEstampas" });
+    const grid = document.getElementById("grid-estampas");
+    grid.innerHTML = ""; // Limpa grid anterior
+    
+    res.estampas.forEach(est => {
+        const div = document.createElement("div");
+        div.style.cursor = "pointer";
+        div.innerHTML = `<img src="${est.url}" style="width:100%; border-radius:8px;">
+                         <p style="font-size:12px; text-align:center;">${est.nome}</p>`;
+        // Ao clicar, chama a função de seleção
+        div.onclick = () => selecionarEstampa(idControle, est.nome, est.url);
+        grid.appendChild(div);
+    });
+    document.getElementById("modal-estampas").classList.remove("escondido");
+}
+
+// Salva a escolha e fecha o modal
+function selecionarEstampa(idControle, nome, url) {
+    const preview = document.getElementById(`preview-est-${idControle}`);
+    preview.dataset.nomeEstampa = nome; // Isso é o que o carrinho vai ler!
+    preview.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; margin-top:10px; background:#f0f0f0; padding:5px; border-radius:5px;">
+            <img src="${url}" style="width:30px; height:30px; border-radius:3px;"> 
+            <small><b>${nome}</b></small>
+        </div>`;
+    document.getElementById("modal-estampas").classList.add("escondido");
 }
