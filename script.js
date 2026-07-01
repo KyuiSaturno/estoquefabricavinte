@@ -603,15 +603,30 @@ function removerEstampa(idControle) {
     document.getElementById(`btn-est-${idControle}`).classList.add("escondido");
 }
 
-function atualizarStatusEstoque(id) {
-    const cor = document.getElementById(`cor-${id}`).value;
-    const tam = document.getElementById(`tam-${id}`).value;
-    const produto = dadosProdutosFiltrados.find(p => ...); // encontre o produto
-    
-    // Busca no mapa o estoque para a chave exata "Cor (Tamanho)"
-    const qtd = produto.estoquePorCor[`${cor} (${tam})`] || 0;
-    document.getElementById(`status-${id}`).innerText = `Disponível: ${qtd} un.`;
-}
+function atualizarStatusEstoque(idUnicoControle) {
+    // 1. O idUnicoControle é algo como "Camisas-ID123". 
+    // Precisamos extrair apenas o "ID123" para buscar na lista.
+    const partes = idUnicoControle.split('-');
+    const produtoId = partes[partes.length - 1]; // Pega o último elemento (o ID real)
 
-// Adicione onchange nos selects do renderizarProdutos:
-// <select id="cor-..." onchange="atualizarStatusEstoque('${idUnicoControle}')">
+    // 2. Busca o produto
+    const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
+    if (!produto) return;
+
+    // 3. Pega os valores selecionados
+    const cor = document.getElementById(`cor-${idUnicoControle}`).value;
+    const tam = document.getElementById(`tam-${idUnicoControle}`).value;
+    
+    // 4. Monta a chave igual ao formato que criamos no Código.gs
+    const chave = `${cor} (${tam})`;
+    
+    // 5. Busca o estoque e atualiza a interface
+    const qtd = (produto.estoquePorCor && produto.estoquePorCor[chave]) ? produto.estoquePorCor[chave] : 0;
+    
+    const elementoStatus = document.getElementById(`status-${idUnicoControle}`);
+    if (elementoStatus) {
+        elementoStatus.innerHTML = `Estoque disponível: <span>${qtd}</span> un.`;
+        // Adiciona uma classe visual se estiver esgotado
+        elementoStatus.className = `estoque-status ${qtd === 0 ? 'sem-estoque' : ''}`;
+    }
+}
