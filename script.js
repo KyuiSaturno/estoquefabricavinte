@@ -324,46 +324,61 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
     if (!listaDiv) return;
     listaDiv.innerHTML = "";
     
+    // Lista de categorias que recebem a opção de estampa
+    const categoriasComEstampa = ["Camisas", "Regatas", "Machão"];
+
     listaProdutos.forEach(produto => {
         const idUnicoControle = `${prefixoContexto}-${produto.id}`;
-        
-        // Extrair tamanhos e cores únicos de forma limpa
         const cores = [...new Set(Object.keys(produto.estoquePorCor || {}).map(k => k.split(' (')[0]))];
         const tamanhos = produto.tamanhos || ["Único"];
 
         const cartao = document.createElement("div");
         cartao.className = "cartao-produto";
-        cartao.innerHTML = `
-            <div class="carrossel">
-                <img src="${produto.imagens[0]}" alt="${produto.nome}">
-            </div>
-            <div class="info-produto">
-                <h3>${produto.nome}</h3>
-                
-                <div class="seletor-grupo">
-                    <label>Cor:</label>
-                    <select id="cor-${idUnicoControle}">${cores.map(c => `<option value="${c}">${c}</option>`).join('')}</select>
-                </div>
 
-                <div class="seletor-grupo">
-                    <label>Tamanho:</label>
-                    <select id="tam-${idUnicoControle}">${tamanhos.map(t => `<option value="${t}">${t}</option>`).join('')}</select>
-                </div>
-
+        // Cria o bloco de estampa condicionalmente
+        let htmlPersonalizacao = "";
+        if (categoriasComEstampa.includes(produto.categoria)) {
+            htmlPersonalizacao = `
                 <div class="personalizacao-grupo" style="margin-top:15px; padding-top:10px; border-top: 1px solid #333;">
                     <label>Personalização:</label>
                     <select id="tipo-${idUnicoControle}" onchange="toggleEstampa('${idUnicoControle}', this.value)">
                         <option value="lisa">Lisa</option>
                         <option value="estampada">Estampada</option>
                     </select>
-                    
                     <button id="btn-est-${idUnicoControle}" class="escondido" onclick="abrirModalEstampas('${idUnicoControle}')">Escolher Estampa</button>
                     <div id="preview-est-${idUnicoControle}" data-nome-estampa="" style="margin-top:5px;"></div>
-                </div>
+                </div>`;
+        }
+
+        cartao.innerHTML = `
+            <div class="carrossel" id="carrossel-${idUnicoControle}">
+                <img src="${produto.imagens[0]}" alt="${produto.nome}" class="ativa">
             </div>
-            <button class="btn-adicionar" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}')">Selecionar Peça</button>
+            <div class="info-produto">
+                <h3>${produto.nome}</h3>
+                
+                <div class="seletor-grupo">
+                    <label>Cor:</label>
+                    <select id="cor-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
+                        ${cores.map(c => `<option value="${c}">${c}</option>`).join('')}
+                    </select>
+                </div>
+
+                <div class="seletor-grupo">
+                    <label>Tamanho:</label>
+                    <select id="tam-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
+                        ${tamanhos.map(t => `<option value="${t}">${t}</option>`).join('')}
+                    </select>
+                </div>
+
+                ${htmlPersonalizacao}
+            </div>
+            <button class="btn-adicionar" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">Selecionar Peça</button>
         `;
         listaDiv.appendChild(cartao);
+        
+        // Chamada inicial para garantir que a imagem correta apareça logo no carregamento
+        atualizarStatusEstoque(produto.id, prefixoContexto, usarEstoquePromo);
     });
 }
 
