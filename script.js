@@ -323,68 +323,45 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
     const listaDiv = document.getElementById(containerId);
     if (!listaDiv) return;
     listaDiv.innerHTML = "";
-    if (listaProdutos.length === 0) {
-        listaDiv.innerHTML = "<p class='carrinho-vazio'>Nenhum modelo disponível.</p>";
-        return;
-    }
-
+    
     listaProdutos.forEach(produto => {
         const idUnicoControle = `${prefixoContexto}-${produto.id}`;
-        if (indicesImagens[idUnicoControle] === undefined) indicesImagens[idUnicoControle] = 0;
         
-        // --- LÓGICA DE TAMANHOS E CORES ---
-        const tamanhosDisponiveis = produto.tamanhos || ["Único"];
-        const coresDisponiveis = Object.keys(produto.estoquePorCor || {});
-        
-        let coresOpcoes = "";
-        coresDisponiveis.forEach(cor => { coresOpcoes += `<option value="${cor}">${cor}</option>`; });
-        
-        let tamanhosOpcoes = "";
-        tamanhosDisponiveis.forEach(tam => { tamanhosOpcoes += `<option value="${tam}">${tam}</option>`; });
-
-        // --- IMAGENS (MESMA LÓGICA) ---
-        let imagensHTML = (produto.imagens && produto.imagens.length > 0) 
-            ? produto.imagens.map((url, index) => `<img src="${url}" class="${index === 0 ? 'ativa' : ''}" data-index="${index}">`).join('')
-            : `<img src="https://placehold.co/400x400?text=Sem+Foto" class="ativa">`;
-
-        let botoesCarrossel = (produto.imagens && produto.imagens.length > 1) 
-            ? `<button class="btn-carrossel btn-prev" onclick="mudarFoto('${idUnicoControle}', ${produto.imagens.length}, -1)">&#10094;</button><button class="btn-carrossel btn-next" onclick="mudarFoto('${idUnicoControle}', ${produto.imagens.length}, 1)">&#10095;</button>` 
-            : "";
-
-        // --- PERSONALIZAÇÃO (ESTAMPAS) ---
-        let htmlPersonalizacao = "";
-        if (["Camisas", "Regatas", "Machão"].includes(produto.categoria)) {
-            htmlPersonalizacao = `
-            <div class="personalizacao-grupo" style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
-                <label>Personalização:</label>
-                <select id="tipo-${idUnicoControle}" onchange="toggleEstampa('${idUnicoControle}', this.value)">
-                    <option value="lisa">Lisa</option>
-                    <option value="estampada">Estampada</option>
-                </select>
-                <button id="btn-est-${idUnicoControle}" class="escondido" onclick="abrirModalEstampas('${idUnicoControle}')" style="margin-top:5px; width:100%; cursor:pointer;">
-                    Escolher Estampa
-                </button>
-                <div id="preview-est-${idUnicoControle}" data-nome-estampa=""></div>
-            </div>`;
-        }
+        // Extrair tamanhos e cores únicos de forma limpa
+        const cores = [...new Set(Object.keys(produto.estoquePorCor || {}).map(k => k.split(' (')[0]))];
+        const tamanhos = produto.tamanhos || ["Único"];
 
         const cartao = document.createElement("div");
         cartao.className = "cartao-produto";
         cartao.innerHTML = `
-            <div class="carrossel" id="carrossel-${idUnicoControle}">${imagensHTML}${botoesCarrossel}</div>
+            <div class="carrossel">
+                <img src="${produto.imagens[0]}" alt="${produto.nome}">
+            </div>
             <div class="info-produto">
-                <h3>${produto.nome.replace("#", "").trim()}</h3>
+                <h3>${produto.nome}</h3>
+                
                 <div class="seletor-grupo">
                     <label>Cor:</label>
-                    <select id="cor-${idUnicoControle}">${coresOpcoes}</select>
+                    <select id="cor-${idUnicoControle}">${cores.map(c => `<option value="${c}">${c}</option>`).join('')}</select>
                 </div>
+
                 <div class="seletor-grupo">
                     <label>Tamanho:</label>
-                    <select id="tam-${idUnicoControle}">${tamanhosOpcoes}</select>
+                    <select id="tam-${idUnicoControle}">${tamanhos.map(t => `<option value="${t}">${t}</option>`).join('')}</select>
                 </div>
-                ${htmlPersonalizacao}
+
+                <div class="personalizacao-grupo" style="margin-top:15px; padding-top:10px; border-top: 1px solid #333;">
+                    <label>Personalização:</label>
+                    <select id="tipo-${idUnicoControle}" onchange="toggleEstampa('${idUnicoControle}', this.value)">
+                        <option value="lisa">Lisa</option>
+                        <option value="estampada">Estampada</option>
+                    </select>
+                    
+                    <button id="btn-est-${idUnicoControle}" class="escondido" onclick="abrirModalEstampas('${idUnicoControle}')">Escolher Estampa</button>
+                    <div id="preview-est-${idUnicoControle}" data-nome-estampa="" style="margin-top:5px;"></div>
+                </div>
             </div>
-            <button class="btn-adicionar" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">Selecionar Peça</button>
+            <button class="btn-adicionar" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}')">Selecionar Peça</button>
         `;
         listaDiv.appendChild(cartao);
     });
@@ -604,9 +581,37 @@ async function abrirModalEstampas(id) {
     document.getElementById("modal-estampas").classList.remove("escondido");
 }
 
-function selecionarEstampa(id, nome, url) {
-    const preview = document.getElementById(`preview-est-${id}`);
+function selecionarEstampa(idControle, nome, url) {
+    const preview = document.getElementById(`preview-est-${idControle}`);
     preview.dataset.nomeEstampa = nome;
-    preview.innerHTML = `<div style="display:flex; align-items:center; gap:5px; margin-top:5px; background:#e0e0e0; padding:5px; border-radius:5px;"><img src="${url}" style="width:25px; height:25px;"> <small>${nome}</small></div>`;
+    preview.innerHTML = `
+        <div class="item-estampa-selecionada" style="display:flex; align-items:center; justify-content:space-between; background:#222; padding:8px; border-radius:4px; border:1px solid #444;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <img src="${url}" style="width:30px; height:30px; border-radius:3px;">
+                <small style="color:#fff;">${nome}</small>
+            </div>
+            <button onclick="removerEstampa('${idControle}')" style="background:transparent; border:none; color:#ff4d4d; cursor:pointer; font-weight:bold;">X</button>
+        </div>`;
     document.getElementById("modal-estampas").classList.add("escondido");
 }
+
+function removerEstampa(idControle) {
+    const preview = document.getElementById(`preview-est-${idControle}`);
+    preview.dataset.nomeEstampa = "";
+    preview.innerHTML = "";
+    document.getElementById(`tipo-${idControle}`).value = "lisa";
+    document.getElementById(`btn-est-${idControle}`).classList.add("escondido");
+}
+
+function atualizarStatusEstoque(id) {
+    const cor = document.getElementById(`cor-${id}`).value;
+    const tam = document.getElementById(`tam-${id}`).value;
+    const produto = dadosProdutosFiltrados.find(p => ...); // encontre o produto
+    
+    // Busca no mapa o estoque para a chave exata "Cor (Tamanho)"
+    const qtd = produto.estoquePorCor[`${cor} (${tam})`] || 0;
+    document.getElementById(`status-${id}`).innerText = `Disponível: ${qtd} un.`;
+}
+
+// Adicione onchange nos selects do renderizarProdutos:
+// <select id="cor-..." onchange="atualizarStatusEstoque('${idUnicoControle}')">
