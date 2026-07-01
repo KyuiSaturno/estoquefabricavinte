@@ -377,8 +377,10 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         `;
         listaDiv.appendChild(cartao);
         
-        // Chamada inicial para garantir que a imagem correta apareça logo no carregamento
-        atualizarStatusEstoque(produto.id, prefixoContexto, usarEstoquePromo);
+        // CORREÇÃO: Usamos setTimeout para garantir que o elemento já exista no DOM
+        setTimeout(() => {
+            atualizarStatusEstoque(produto.id, prefixoContexto, usarEstoquePromo);
+        }, 0);
     });
 }
 
