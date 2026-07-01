@@ -319,69 +319,50 @@ function aplicarFiltroVisual() {
     }
 }
 
-function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEstoquePromo = false) {
-    const listaDiv = document.getElementById(containerId);
-    if (!listaDiv) return;
-    listaDiv.innerHTML = "";
+function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
+    const idUnicoControle = `${prefixoContexto}-${produtoId}`;
+    const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
+    if (!produto) return;
+
+    const seletorCor = document.getElementById(`cor-${idUnicoControle}`);
+    const seletorTam = document.getElementById(`tam-${idUnicoControle}`);
+    if (!seletorCor || !seletorTam) return;
+
+    const cor = seletorCor.value;
+    const tam = seletorTam.value;
+    const chave = `${cor} (${tam})`;
+
+    // 1. Estoque
+    const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
+    const qtd = mapaEstoque[chave] || 0;
+
+    // Atualiza texto e classe de esgotado
+    const statusP = document.getElementById(`status-${idUnicoControle}`);
+    if (statusP) {
+        statusP.innerHTML = `Disponível: <span>${qtd}</span> un.`;
+        statusP.className = qtd === 0 ? "estoque-status sem-estoque" : "estoque-status";
+    }
+
+    // Atualiza botão
+    const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
+    if (btnAdd) {
+        btnAdd.innerText = qtd === 0 ? "Esgotado" : "Selecionar Peça";
+        btnAdd.disabled = (qtd === 0);
+    }
+
+    // 2. Imagens (A troca da imagem)
+    const mapaImagens = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
     
-    // Lista de categorias que recebem a opção de estampa
-    const categoriasComEstampa = ["Camisas", "Regatas", "Machão"];
+    // Tentamos buscar pela chave composta, se não achar, pegamos a primeira
+    const novaUrl = (mapaImagens && mapaImagens[chave]) ? mapaImagens[chave] : produto.imagens[0];
 
-    listaProdutos.forEach(produto => {
-        const idUnicoControle = `${prefixoContexto}-${produto.id}`;
-        const cores = [...new Set(Object.keys(produto.estoquePorCor || {}).map(k => k.split(' (')[0]))];
-        const tamanhos = produto.tamanhos || ["Único"];
-
-        const cartao = document.createElement("div");
-        cartao.className = "cartao-produto";
-
-        // Cria o bloco de estampa condicionalmente
-        let htmlPersonalizacao = "";
-        if (categoriasComEstampa.includes(produto.categoria)) {
-            htmlPersonalizacao = `
-                <div class="personalizacao-grupo" style="margin-top:15px; padding-top:10px; border-top: 1px solid #333;">
-                    <label>Personalização:</label>
-                    <select id="tipo-${idUnicoControle}" onchange="toggleEstampa('${idUnicoControle}', this.value)">
-                        <option value="lisa">Lisa</option>
-                        <option value="estampada">Estampada</option>
-                    </select>
-                    <button id="btn-est-${idUnicoControle}" class="escondido" onclick="abrirModalEstampas('${idUnicoControle}')">Escolher Estampa</button>
-                    <div id="preview-est-${idUnicoControle}" data-nome-estampa="" style="margin-top:5px;"></div>
-                </div>`;
+    const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
+    if (carrosselDiv) {
+        const img = carrosselDiv.querySelector("img");
+        if (img) {
+            img.src = novaUrl;
         }
-
-        cartao.innerHTML = `
-            <div class="carrossel" id="carrossel-${idUnicoControle}">
-                <img src="${produto.imagens[0]}" alt="${produto.nome}" class="ativa">
-            </div>
-            <div class="info-produto">
-                <h3>${produto.nome}</h3>
-                
-                <div class="seletor-grupo">
-                    <label>Cor:</label>
-                    <select id="cor-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
-                        ${cores.map(c => `<option value="${c}">${c}</option>`).join('')}
-                    </select>
-                </div>
-
-                <div class="seletor-grupo">
-                    <label>Tamanho:</label>
-                    <select id="tam-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">
-                        ${tamanhos.map(t => `<option value="${t}">${t}</option>`).join('')}
-                    </select>
-                </div>
-
-                ${htmlPersonalizacao}
-            </div>
-            <button class="btn-adicionar" onclick="adicionarAoCarrinho('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">Selecionar Peça</button>
-        `;
-        listaDiv.appendChild(cartao);
-        
-        // CORREÇÃO: Usamos setTimeout para garantir que o elemento já exista no DOM
-        setTimeout(() => {
-            atualizarStatusEstoque(produto.id, prefixoContexto, usarEstoquePromo);
-        }, 0);
-    });
+    }
 }
 
 function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = false) {
