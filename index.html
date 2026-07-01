@@ -112,6 +112,12 @@
         </button>
     </nav>
 
+    <div id="modal-estampas" class="escondido" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; padding:20px; overflow-y:auto;">
+    <h2 style="color:#fff; text-align:center;">Selecione uma Estampa</h2>
+    <div id="grid-estampas" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:15px; margin-top:20px;"></div>
+    <button onclick="document.getElementById('modal-estampas').classList.add('escondido')" style="width:100%; padding:15px; margin-top:20px; background:red; color:#fff; border:none;">Fechar</button>
+</div>
+
     <script src="script.js"></script>
 </body>
 </html>
