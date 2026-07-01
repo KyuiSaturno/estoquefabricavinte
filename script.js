@@ -322,6 +322,11 @@ function aplicarFiltroVisual() {
 // ==========================================
 // RENDERIZAÇÃO DOS CARTÕES DE PRODUTO
 // ==========================================
+
+// Categorias que possuem opção de estampa. Ajuste esta lista se novas categorias
+// com estampa forem criadas (o nome deve ser IDÊNTICO ao nome da aba na planilha).
+const CATEGORIAS_COM_ESTAMPA = ["Camisas", "Regatas", "Machão"];
+
 function renderizarProdutos(produtos, containerId, prefixoContexto, usarEstoquePromo = false) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -381,6 +386,7 @@ function renderizarProdutos(produtos, containerId, prefixoContexto, usarEstoqueP
 
                 <p class="tecido-info">Tecido: <strong id="tecido-${idUnico}">-</strong></p>
 
+                ${CATEGORIAS_COM_ESTAMPA.includes(produto.categoria) ? `
                 <div class="seletor-grupo">
                     <label>Estampa:</label>
                     <select id="tipo-${idUnico}" onchange="toggleEstampa('${idUnico}', this.value)">
@@ -391,6 +397,7 @@ function renderizarProdutos(produtos, containerId, prefixoContexto, usarEstoqueP
 
                 <button type="button" id="btn-est-${idUnico}" class="btn-adicionar escondido" style="margin-top:0;" onclick="abrirModalEstampas('${idUnico}')">Escolher Estampa</button>
                 <div id="preview-est-${idUnico}" data-nome-estampa=""></div>
+                ` : ""}
 
                 <p class="estoque-status" id="status-${idUnico}">Disponível: <span>0</span> un.</p>
 
@@ -517,6 +524,49 @@ function removerEstampaDoCarrinho(index) {
 
 function silverwareDelete(index) { carrinho.splice(index, 1); atualizarInterfaceCarrinho(); }
 
+function editarQuantidade(spanElement, index) {
+    const item = carrinho[index];
+    if (!item) return;
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.inputMode = "numeric";
+    input.min = "1";
+    input.value = item.quantidade;
+    input.style.width = "55px";
+    input.style.textAlign = "center";
+    input.style.background = "#1A1A1A";
+    input.style.color = "#fff";
+    input.style.border = "1px solid #444444";
+    input.style.borderRadius = "4px";
+    input.style.padding = "4px";
+
+    spanElement.replaceWith(input);
+    input.focus();
+    input.select();
+
+    let jaConfirmado = false;
+    const confirmar = () => {
+        if (jaConfirmado) return;
+        jaConfirmado = true;
+        const novoValor = parseInt(input.value, 10);
+        if (isNaN(novoValor) || novoValor <= 0) {
+            carrinho.splice(index, 1);
+        } else {
+            item.quantidade = novoValor;
+        }
+        atualizarInterfaceCarrinho();
+    };
+
+    input.addEventListener("blur", confirmar);
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            input.blur();
+        }
+    });
+}
+
 function alterarQuantidadeCarrinho(index, alteracao) {
     const item = carrinho[index];
     if (!item) return;
@@ -563,7 +613,7 @@ function atualizarInterfaceCarrinho() {
                 </div>
                 <div style="display:flex; align-items:center; gap:5px;">
                     <button onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button>
-                    <span>${item.quantidade}</span>
+                    <span ondblclick="editarQuantidade(this, ${index})" title="Clique 2x para digitar a quantidade">${item.quantidade}</span>
                     <button onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
                 </div>
                 <button style="background-color: #ff4d4d; color: white;" onclick="silverwareDelete(${index})">Excluir</button>
