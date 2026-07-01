@@ -663,3 +663,18 @@ div[class*="abas"] {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==========================================
+   ESTILO DO TECIDO (NOVO)
+   ========================================== */
+.tecido-info {
+    font-size: 13px !important;
+    color: #AAAAAA !important; /* Cinza suave para o label 'Tecido:' */
+    margin: 5px 0 !important;
+    font-weight: 500;
+}
+
+.tecido-info strong {
+    color: var(--cor-principal); /* O nome do tecido destaca na cor amarela */
+    font-weight: 700;
+}
