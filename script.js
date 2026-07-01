@@ -388,12 +388,19 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
     if (!produto) return;
 
     const seletorCor = document.getElementById(`cor-${idUnicoControle}`);
-    if (!seletorCor) return;
+    const seletorTam = document.getElementById(`tam-${idUnicoControle}`);
+    if (!seletorCor || !seletorTam) return;
+
     const corSelecionada = seletorCor.value;
+    const tamSelecionado = seletorTam.value;
+    
+    // A CHAVE CORRETA: Cor (Tamanho)
+    const chaveBusca = `${corSelecionada} (${tamSelecionado})`;
 
     // --- LÓGICA DE ESTOQUE ---
     const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
-    const qtdDisponivel = mapaEstoque[corSelecionada] || 0;
+    const qtdDisponivel = mapaEstoque[chaveBusca] || 0;
+    
     const statusP = document.getElementById(`status-${idUnicoControle}`);
     const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
     
@@ -408,29 +415,26 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
         btnAdd.disabled = (qtdDisponivel === 0);
     }
 
-    // --- NOVA LÓGICA: ATUALIZAÇÃO DO TECIDO ---
+    // --- LÓGICA DE TECIDO ---
     const tecidoP = document.getElementById(`tecido-${idUnicoControle}`);
     const mapaTecido = usarEstoquePromo ? produto.tecidoPromoPorCor : produto.tecidoPorCor;
-    const novoTecido = mapaTecido[corSelecionada] || "N/A";
-    if (tecidoP) {
-        tecidoP.innerText = novoTecido;
-    }
+    const novoTecido = mapaTecido[chaveBusca] || "N/A";
+    if (tecidoP) tecidoP.innerText = novoTecido;
 
     // --- LÓGICA DE IMAGENS ---
     const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
-    const urlImagemCor = mapaImagensAlvo ? mapaImagensAlvo[corSelecionada] : "";
+    
+    // IMPORTANTE: Aqui buscamos pela chave composta
+    const urlImagemCor = (mapaImagensAlvo && mapaImagensAlvo[chaveBusca]) ? mapaImagensAlvo[chaveBusca] : produto.imagens[0];
+    
     if (urlImagemCor) {
         const carrosselDiv = document.getElementById(`carrossel-${idUnicoControle}`);
         if (carrosselDiv) {
-            const images = carrosselDiv.querySelectorAll("img");
-            images.forEach((img, index) => {
-                const srcAtual = img.getAttribute('src');
-                if (srcAtual === urlImagemCor || urlImagemCor.includes(srcAtual) || srcAtual.includes(urlImagemCor)) {
-                    images.forEach(i => i.classList.remove("ativa"));
-                    img.classList.add("ativa");
-                    indicesImagens[idUnicoControle] = index;
-                }
-            });
+            const imgAtual = carrosselDiv.querySelector("img");
+            if (imgAtual) {
+                imgAtual.src = urlImagemCor;
+                imgAtual.classList.add("ativa");
+            }
         }
     }
 }
