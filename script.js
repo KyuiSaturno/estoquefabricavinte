@@ -330,13 +330,21 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
     listaProdutos.forEach(produto => {
         const idUnicoControle = `${prefixoContexto}-${produto.id}`;
         if (indicesImagens[idUnicoControle] === undefined) indicesImagens[idUnicoControle] = 0;
+        
         const mapaEstoqueAlvo = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
         if (!mapaEstoqueAlvo) return;
+        
         const coresTotais = Object.keys(mapaEstoqueAlvo);
         const coresDisponiveis = usarEstoquePromo ? coresTotais.filter(cor => (mapaEstoqueAlvo[cor] || 0) > 0) : coresTotais;
         if (coresDisponiveis.length === 0) return;
+        
         const primeiraCor = coresDisponiveis[0] || "Padrão";
         const estoqueInicial = mapaEstoqueAlvo[primeiraCor] || 0;
+        
+        // --- NOVO: Lógica do Tecido Inicial ---
+        const tecidoInicial = usarEstoquePromo ? (produto.tecidoPromoPorCor[primeiraCor] || "N/A") : (produto.tecidoPorCor[primeiraCor] || "N/A");
+
+        // ... (resto da lógica de imagens permanece igual)
         const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
         const urlImagemInicial = mapaImagensAlvo ? mapaImagensAlvo[primeiraCor] : "";
         let indiceInicialEncontrado = 0;
@@ -361,12 +369,14 @@ function renderizarProdutos(listaProdutos, containerId, prefixoContexto, usarEst
         coresDisponiveis.forEach(cor => { coresOpcoes += `<option value="${cor}">${cor}</option>`; });
         const tagPromoHTML = usarEstoquePromo ? `<div style="position: absolute; top: 10px; left: 10px; background-color: var(--cor-erro); color: white; padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 4px; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">Promoção</div>` : '';
         const nomeFormatado = produto.nome.replace("#", "").trim();
+        
         const cartao = document.createElement("div");
         cartao.className = "cartao-produto";
         cartao.innerHTML = `
             <div class="carrossel" id="carrossel-${idUnicoControle}">${tagPromoHTML}${imagensHTML}${botoesCarrossel}</div>
             <div class="info-produto">
                 <h3>${nomeFormatado}</h3>
+                <p style="font-size: 13px; color: #666; margin: 5px 0;">Tecido: <strong id="tecido-${idUnicoControle}">${tecidoInicial}</strong></p>
                 <div class="seletor-grupo">
                     <label>Selecione a Cor / Tamanho:</label>
                     <select id="cor-${idUnicoControle}" onchange="atualizarStatusEstoque('${produto.id}', '${prefixoContexto}', ${usarEstoquePromo})">${coresOpcoes}</select>
@@ -383,22 +393,37 @@ function atualizarStatusEstoque(produtoId, prefixoContexto, usarEstoquePromo = f
     const idUnicoControle = `${prefixoContexto}-${produtoId}`;
     const produto = dadosProdutosFiltrados.find(p => String(p.id) === String(produtoId));
     if (!produto) return;
+
     const seletorCor = document.getElementById(`cor-${idUnicoControle}`);
     if (!seletorCor) return;
     const corSelecionada = seletorCor.value;
+
+    // --- LÓGICA DE ESTOQUE ---
     const mapaEstoque = usarEstoquePromo ? produto.estoquePromocional : produto.estoquePorCor;
     const qtdDisponivel = mapaEstoque[corSelecionada] || 0;
     const statusP = document.getElementById(`status-${idUnicoControle}`);
     const btnAdd = document.getElementById(`btn-add-${idUnicoControle}`);
+    
     if (statusP) {
         const spanEstoque = statusP.querySelector("span");
         if (spanEstoque) spanEstoque.innerText = qtdDisponivel;
         statusP.classList.toggle("sem-estoque", qtdDisponivel === 0);
     }
+    
     if (btnAdd) {
         btnAdd.innerText = qtdDisponivel === 0 ? "Esgotado" : "Selecionar Peça";
         btnAdd.disabled = (qtdDisponivel === 0);
     }
+
+    // --- NOVA LÓGICA: ATUALIZAÇÃO DO TECIDO ---
+    const tecidoP = document.getElementById(`tecido-${idUnicoControle}`);
+    const mapaTecido = usarEstoquePromo ? produto.tecidoPromoPorCor : produto.tecidoPorCor;
+    const novoTecido = mapaTecido[corSelecionada] || "N/A";
+    if (tecidoP) {
+        tecidoP.innerText = novoTecido;
+    }
+
+    // --- LÓGICA DE IMAGENS ---
     const mapaImagensAlvo = (usarEstoquePromo && produto.imagemPromoPorCor) ? produto.imagemPromoPorCor : produto.imagemPorCor;
     const urlImagemCor = mapaImagensAlvo ? mapaImagensAlvo[corSelecionada] : "";
     if (urlImagemCor) {
