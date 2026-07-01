@@ -509,8 +509,15 @@ function atualizarInterfaceCarrinho() {
     const btnConfirmarMobile = document.getElementById("btn-confirmar");
     const totalItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
     
-    document.getElementById("contador-Abas")?.innerText = totalItens;
-    document.getElementById("contador-topo")?.innerText = totalItens;
+    const badgeAbas = document.getElementById("contador-Abas");
+if (badgeAbas) {
+    badgeAbas.innerText = totalItens;
+}
+
+const badgeTopo = document.getElementById("contador-topo");
+if (badgeTopo) {
+    badgeTopo.innerText = totalItens;
+}
 
     if (carrinho.length === 0) {
         if (containerMobile) containerMobile.innerHTML = '<p class="carrinho-vazio">Nenhum item selecionado.</p>';
